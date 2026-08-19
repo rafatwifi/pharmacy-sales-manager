@@ -1,0 +1,107 @@
+[
+    {
+        "id": "678a1b2c3d001",
+        "name": "Omegalic",
+        "price": 7600,
+        "target_qty": 500,
+        "image": ""
+    },
+    {
+        "id": "678a1b2c3d002",
+        "name": "Nutra Sleep",
+        "price": 12000,
+        "target_qty": 300,
+        "image": ""
+    },
+    {
+        "id": "678a1b2c3d003",
+        "name": "Breeky",
+        "price": 8500,
+        "target_qty": 400,
+        "image": ""
+    },
+    {
+        "id": "678a1b2c3d004",
+        "name": "ALBUVEN",
+        "price": 15000,
+        "target_qty": 200,
+        "image": ""
+    },
+    {
+        "id": "678a1b2c3d005",
+        "name": "Vit-D3 Plus",
+        "price": 6500,
+        "target_qty": 350,
+        "image": ""
+    },
+    {
+        "id": "678a1b2c3d006",
+        "name": "Calcium Forte",
+        "price": 9000,
+        "target_qty": 250,
+        "image": ""
+    },
+    {
+        "id": "678a1b2c3d007",
+        "name": "Iron Max",
+        "price": 5500,
+        "target_qty": 450,
+        "image": ""
+    },
+    {
+        "id": "678a1b2c3d008",
+        "name": "Probiotic Balance",
+        "price": 11000,
+        "target_qty": 280,
+        "image": ""
+    },
+    {
+        "id": "678a1b2c3d009",
+        "name": "Joint Flex",
+        "price": 13500,
+        "target_qty": 220,
+        "image": ""
+    },
+    {
+        "id": "678a1b2c3d010",
+        "name": "Immune Boost",
+        "price": 7200,
+        "target_qty": 380,
+        "image": ""
+    },
+    {
+        "id": "678a1b2c3d011",
+        "name": "Hair & Skin",
+        "price": 9800,
+        "target_qty": 320,
+        "image": ""
+    },
+    {
+        "id": "678a1b2c3d012",
+        "name": "Magnesium Calm",
+        "price": 6800,
+        "target_qty": 360,
+        "image": ""
+    },
+    {
+        "id": "678a1b2c3d013",
+        "name": "Omega Kids",
+        "price": 8200,
+        "target_qty": 290,
+        "image": ""
+    },
+    {
+        "id": "678a1b2c3d014",
+        "name": "Multivit Daily",
+        "price": 7500,
+        "target_qty": 420,
+        "image": ""
+    },
+    {
+        "id": "678a1b2c3d015",
+        "name": "Collagen Plus",
+        "price": 14500,
+        "target_qty": 180,
+        "image": ""
+    }
+]

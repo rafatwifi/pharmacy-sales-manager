@@ -1,0 +1,74 @@
+[
+    {
+        "product_id": "678a1b2c3d001",
+        "product": "Omegalic",
+        "pharmacy": "صيدلية النور",
+        "qty": 10,
+        "price": 8640,
+        "total": 86400,
+        "date": "2026-07-15 10:30"
+    },
+    {
+        "product_id": "678a1b2c3d001",
+        "product": "Omegalic",
+        "pharmacy": "صيدلية الشفاء",
+        "qty": 5,
+        "price": 7600,
+        "total": 38000,
+        "date": "2026-07-16 14:20"
+    },
+    {
+        "product_id": "678a1b2c3d002",
+        "product": "Nutra Sleep",
+        "pharmacy": "صيدلية النور",
+        "qty": 3,
+        "price": 12000,
+        "total": 36000,
+        "date": "2026-07-17 09:15"
+    },
+    {
+        "product_id": "678a1b2c3d003",
+        "product": "Breeky",
+        "pharmacy": "صيدلية الأمل",
+        "qty": 8,
+        "price": 8500,
+        "total": 68000,
+        "date": "2026-07-18 11:45"
+    },
+    {
+        "product_id": "678a1b2c3d004",
+        "product": "ALBUVEN",
+        "pharmacy": "صيدلية الشفاء",
+        "qty": 2,
+        "price": 15000,
+        "total": 30000,
+        "date": "2026-07-19 16:00"
+    },
+    {
+        "product_id": "678a1b2c3d005",
+        "product": "Vit-D3 Plus",
+        "pharmacy": "صيدلية الأمل",
+        "qty": 12,
+        "price": 6500,
+        "total": 78000,
+        "date": "2026-07-20 08:30"
+    },
+    {
+        "product_id": "678a1b2c3d010",
+        "product": "Immune Boost",
+        "pharmacy": "صيدلية النور",
+        "qty": 6,
+        "price": 7200,
+        "total": 43200,
+        "date": "2026-07-21 13:10"
+    },
+    {
+        "product_id": "678a1b2c3d014",
+        "product": "Multivit Daily",
+        "pharmacy": "صيدلية الرافدين",
+        "qty": 15,
+        "price": 7500,
+        "total": 112500,
+        "date": "2026-07-22 10:00"
+    }
+]
