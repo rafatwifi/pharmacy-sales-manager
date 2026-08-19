@@ -1,5 +1,7 @@
 # Pharmacy Sales Manager
 
+نظام إدارة مبيعات الصيدليات والمنتجات الطبية — تتبع المبيعات، التاركت، والصيدليات.
+
 Medical/pharmacy sales tracking app for managing products, recording sales by pharmacy, and viewing reports.
 
 ## Features
