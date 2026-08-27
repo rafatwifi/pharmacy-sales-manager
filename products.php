@@ -97,15 +97,16 @@ if (isset($_GET['msg'])) {
 *{box-sizing:border-box}
 body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(circle at top,#0ea5e9,#0f172a 45%,#020617);color:white;min-height:100vh}
 .container{width:100%;max-width:1300px;margin:auto;padding:16px}
-.header{position:sticky;top:0;z-index:850;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin:0 0 16px;padding:12px 0 14px;background:linear-gradient(180deg,rgba(2,6,23,.94),rgba(2,6,23,.78) 70%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
-.logo{font-size:28px;font-weight:bold}
-.nav{display:flex;gap:8px;flex-wrap:wrap}
-.nav a{color:#f8fafc;text-decoration:none;padding:11px 16px;border-radius:999px;font-weight:700;display:inline-block;border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 8px 20px rgba(0,0,0,.12)}
-.nav a.active{box-shadow:0 0 0 2px rgba(255,255,255,.28),0 8px 20px rgba(0,0,0,.12);border-color:rgba(255,255,255,.7)}
-.btn-nav-dash{background:rgba(255,200,160,.28)}
-.btn-nav-products{background:rgba(190,242,100,.25)}
-.btn-nav-sales{background:rgba(196,181,253,.28)}
-.btn-nav-pharmacies{background:rgba(249,168,212,.28)}
+.header{position:sticky;top:0;z-index:850;display:flex;flex-direction:column;align-items:stretch;gap:10px;margin:0 0 16px;padding:10px 0 12px;background:linear-gradient(180deg,rgba(2,6,23,.96),rgba(2,6,23,.84) 78%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.logo{font-size:26px;font-weight:bold}
+.nav{display:flex;flex-wrap:nowrap;gap:4px;width:100%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:18px;padding:5px}
+.nav a{flex:1 1 0;min-width:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#e2e8f0;text-decoration:none;padding:11px 8px;border-radius:14px;font-weight:800;font-size:14px;border:0;background:transparent}
+.nav a:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav a.active{background:rgba(255,255,255,.22);color:#fff;box-shadow:0 8px 18px rgba(0,0,0,.18)}
+.btn-nav-dash.active{background:linear-gradient(180deg,rgba(255,200,160,.55),rgba(251,146,60,.38))}
+.btn-nav-products.active{background:linear-gradient(180deg,rgba(190,242,100,.50),rgba(132,204,22,.32))}
+.btn-nav-sales.active{background:linear-gradient(180deg,rgba(196,181,253,.55),rgba(139,92,246,.34))}
+.btn-nav-pharmacies.active{background:linear-gradient(180deg,rgba(249,168,212,.55),rgba(236,72,153,.34))}
 .msg{background:#22c55e;padding:14px;border-radius:16px;margin-bottom:18px;font-weight:bold}
 .card{background:rgba(255,255,255,.12);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.18);border-radius:24px;padding:18px;margin-bottom:22px}
 .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:14px}
@@ -124,7 +125,7 @@ tr td:last-child{border-radius:14px 0 0 14px}
 .modal-content{background:#0f172a;padding:20px;border-radius:20px;width:100%;max-width:400px;border:1px solid rgba(255,255,255,.2)}
 .modal-content h3{margin-top:0}
 .close{float:left;cursor:pointer;font-size:24px;color:#e11d48}
-@media(max-width:600px){.logo{font-size:21px}.form-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.logo{font-size:21px}.nav a{font-size:11px;padding:9px 4px}.form-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -133,7 +134,7 @@ tr td:last-child{border-radius:14px 0 0 14px}
         <div class="logo">💊 Medical Sales</div>
         <div class="nav">
             <a class="btn-nav-dash" href="dashboard.php">الداشبورد</a>
-            <a class="btn-nav-products active" href="products.php">إدارة المنتجات</a>
+            <a class="btn-nav-products active" href="products.php">المنتجات</a>
             <a class="btn-nav-sales" href="reports.php#section-sales">المبيعات</a>
             <a class="btn-nav-pharmacies" href="reports.php#section-pharmacies">الصيدليات</a>
         </div>

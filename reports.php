@@ -96,16 +96,16 @@ uasort($pharmacyReport, function ($a, $b) {
 *{box-sizing:border-box}html{scroll-behavior:smooth}
 body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(circle at top,#0ea5e9,#0f172a 45%,#020617);color:white;min-height:100vh}
 .container{width:100%;max-width:1300px;margin:auto;padding:16px}
-.header{position:sticky;top:0;z-index:850;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin:0 0 16px;padding:12px 0 14px;background:linear-gradient(180deg,rgba(2,6,23,.94),rgba(2,6,23,.78) 70%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
-.logo{font-size:28px;font-weight:bold}
-.nav{display:flex;gap:8px;flex-wrap:wrap}
-.nav a{color:#f8fafc;text-decoration:none;padding:11px 16px;border-radius:999px;font-weight:700;display:inline-block;transition:transform .15s ease;border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 8px 20px rgba(0,0,0,.12)}
-.nav a:hover{transform:translateY(-2px)}
-.nav a.active{box-shadow:0 0 0 2px rgba(255,255,255,.28),0 8px 20px rgba(0,0,0,.12);border-color:rgba(255,255,255,.7)}
-.btn-nav-dash{background:rgba(255,200,160,.28)}
-.btn-nav-products{background:rgba(190,242,100,.25)}
-.btn-nav-sales{background:rgba(196,181,253,.28)}
-.btn-nav-pharmacies{background:rgba(249,168,212,.28)}
+.header{position:sticky;top:0;z-index:850;display:flex;flex-direction:column;align-items:stretch;gap:10px;margin:0 0 16px;padding:10px 0 12px;background:linear-gradient(180deg,rgba(2,6,23,.96),rgba(2,6,23,.84) 78%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.logo{font-size:26px;font-weight:bold}
+.nav{display:flex;flex-wrap:nowrap;gap:4px;width:100%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:18px;padding:5px}
+.nav a{flex:1 1 0;min-width:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#e2e8f0;text-decoration:none;padding:11px 8px;border-radius:14px;font-weight:800;font-size:14px;border:0;background:transparent}
+.nav a:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav a.active{background:rgba(255,255,255,.22);color:#fff;box-shadow:0 8px 18px rgba(0,0,0,.18)}
+.btn-nav-dash.active{background:linear-gradient(180deg,rgba(255,200,160,.55),rgba(251,146,60,.38))}
+.btn-nav-products.active{background:linear-gradient(180deg,rgba(190,242,100,.50),rgba(132,204,22,.32))}
+.btn-nav-sales.active{background:linear-gradient(180deg,rgba(196,181,253,.55),rgba(139,92,246,.34))}
+.btn-nav-pharmacies.active{background:linear-gradient(180deg,rgba(249,168,212,.55),rgba(236,72,153,.34))}
 .msg{background:#22c55e;padding:14px;border-radius:16px;margin-bottom:18px;font-weight:bold}
 .card{background:rgba(255,255,255,.12);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.18);border-radius:24px;padding:18px;margin-bottom:22px;scroll-margin-top:88px}
 .table-wrap{width:100%;padding-bottom:8px}
@@ -135,7 +135,7 @@ tr td:last-child{border-radius:14px 0 0 14px}
 .pharmacy-meta{display:flex;justify-content:space-between;gap:8px;margin-bottom:10px;color:#f9a8d4;font-size:13px;font-weight:bold}
 .back-top{position:fixed;left:18px;bottom:22px;z-index:900;width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);color:#fff;font-size:24px;font-weight:bold;display:none;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 10px 24px rgba(0,0,0,.18)}
 .back-top.show{display:flex}
-@media(max-width:600px){.container{padding:10px}.logo{font-size:21px}.card{padding:13px}.report-table th,.report-table td{font-size:12px;padding:10px 4px}.sales-table{min-width:920px}}
+@media(max-width:600px){.container{padding:10px}.logo{font-size:21px}.nav a{font-size:11px;padding:9px 4px}.card{padding:13px}.report-table th,.report-table td{font-size:12px;padding:10px 4px}.sales-table{min-width:920px}}
 </style>
 </head>
 <body>
@@ -144,7 +144,7 @@ tr td:last-child{border-radius:14px 0 0 14px}
         <div class="logo">📊 التقارير</div>
         <div class="nav">
             <a class="btn-nav-dash" href="dashboard.php">الداشبورد</a>
-            <a class="btn-nav-products" href="products.php">إدارة المنتجات</a>
+            <a class="btn-nav-products" href="products.php">المنتجات</a>
             <a class="btn-nav-sales" id="navSales" href="reports.php#section-sales">المبيعات</a>
             <a class="btn-nav-pharmacies" id="navPharmacies" href="reports.php#section-pharmacies">الصيدليات</a>
         </div>
