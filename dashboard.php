@@ -13,13 +13,17 @@ $msg = '';
 function saveJson($file, $data){ file_put_contents($file, json_encode(array_values($data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX); }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['sell'])) {
-        $id = $_POST['id'] ?? '';
-        $sellQty = (int)($_POST['sell_qty'] ?? 0);
+    if (isset($_POST['sell_batch'])) {
         $pharmacy = trim($_POST['pharmacy'] ?? '');
-        foreach ($products as $p) {
-            if ((string)$p['id'] === (string)$id) {
-                if ($sellQty > 0 && $pharmacy !== '') {
+        $qtys = $_POST['qty'] ?? [];
+        if ($pharmacy === '') {
+            $msg = 'يرجى إدخال اسم الصيدلية ❌';
+        } else {
+            $added = 0;
+            foreach ($products as $p) {
+                $id = (string)$p['id'];
+                $sellQty = (int)($qtys[$id] ?? 0);
+                if ($sellQty > 0) {
                     $sales[] = [
                         'product_id' => $p['id'],
                         'product' => $p['name'],
@@ -29,13 +33,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'total' => $sellQty * (float)$p['price'],
                         'date' => date('Y-m-d H:i')
                     ];
-                    saveJson($salesFile, $sales);
-                    header('Location: dashboard.php?msg=sold');
-                    exit;
-                } else {
-                    $msg = 'يرجى إدخال اسم الصيدلية والكمية بشكل صحيح ❌';
+                    $added++;
                 }
             }
+            if ($added > 0) {
+                saveJson($salesFile, $sales);
+                header('Location: dashboard.php?msg=sold');
+                exit;
+            }
+            $msg = 'يرجى إدخال كمية لمنتج واحد على الأقل ❌';
         }
     }
 }
@@ -52,6 +58,14 @@ foreach ($sales as $s) {
     $productReport[$name]['qty'] += (int)$s['qty'];
     $productReport[$name]['total'] += (float)$s['total'];
 }
+
+$pharmacyNames = [];
+foreach ($sales as $s) {
+    $n = trim((string)($s['pharmacy'] ?? ''));
+    if ($n !== '') $pharmacyNames[$n] = true;
+}
+$pharmacyNames = array_keys($pharmacyNames);
+sort($pharmacyNames, SORT_STRING);
 
 $totalSales = array_sum(array_column($sales, 'total'));
 $totalTarget = 0;
@@ -72,17 +86,18 @@ $globalTargetPercent = $totalTarget > 0 ? min(100, round(($totalSales / $totalTa
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}html{scroll-behavior:smooth}
-body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(circle at top,#0ea5e9,#0f172a 45%,#020617);color:white;min-height:100vh}
+body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(circle at top,#0ea5e9,#0f172a 45%,#020617);color:white;min-height:100vh;padding-bottom:96px}
 .container{width:100%;max-width:1300px;margin:auto;padding:16px}
-.header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.header{position:sticky;top:0;z-index:850;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin:0 0 16px;padding:12px 0 14px;background:linear-gradient(180deg,rgba(2,6,23,.94),rgba(2,6,23,.78) 70%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 .logo{font-size:28px;font-weight:bold}
 .nav{display:flex;gap:8px;flex-wrap:wrap}
 .nav a{color:#f8fafc;text-decoration:none;padding:11px 16px;border-radius:999px;font-weight:700;display:inline-block;transition:transform .15s ease,background .15s ease;border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 8px 20px rgba(0,0,0,.12)}
 .nav a:hover{transform:translateY(-2px)}
-.btn-nav-sell{background:rgba(255,200,160,.28)}
-.btn-nav-reports{background:rgba(196,181,253,.28)}
-.btn-nav-pharmacies{background:rgba(249,168,212,.28)}
+.nav a.active{box-shadow:0 0 0 2px rgba(255,255,255,.28),0 8px 20px rgba(0,0,0,.12);border-color:rgba(255,255,255,.7)}
+.btn-nav-dash{background:rgba(255,200,160,.28)}
 .btn-nav-products{background:rgba(190,242,100,.25)}
+.btn-nav-sales{background:rgba(196,181,253,.28)}
+.btn-nav-pharmacies{background:rgba(249,168,212,.28)}
 .search{width:100%;padding:14px;border:0;border-radius:16px;margin:0 0 18px;font-size:16px;outline:none;font-family:inherit}
 .widgets{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:14px}
 .widget{position:relative;overflow:hidden;border-radius:28px;color:#f8fafc;min-height:122px;padding:18px 20px;display:flex;flex-direction:column;justify-content:space-between;border:1px solid rgba(255,255,255,.34);backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);box-shadow:0 12px 30px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.45)}
@@ -96,6 +111,7 @@ body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(c
 .c-pink{background:linear-gradient(145deg,rgba(255,190,220,.36),rgba(255,255,255,.12))}
 .c-amber{background:linear-gradient(145deg,rgba(255,224,160,.36),rgba(255,255,255,.12))}
 .msg{background:#22c55e;padding:14px;border-radius:16px;margin-bottom:18px;font-weight:bold}
+.msg.err{background:#e11d48}
 .card{background:rgba(255,255,255,.12);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.18);border-radius:24px;padding:18px;margin-bottom:22px;scroll-margin-top:18px}
 .sell-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
 .sell-card{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:14px}
@@ -105,21 +121,42 @@ body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(c
 .progress{height:22px;border-radius:20px;background:rgba(255,255,255,.2);overflow:hidden;margin-top:15px;position:relative}
 .progress-text{position:absolute;width:100%;text-align:center;line-height:22px;font-size:13px;font-weight:bold;color:#fff;text-shadow:1px 1px 3px rgba(0,0,0,0.8);z-index:2;left:0;top:0}
 .bar{height:100%;background:linear-gradient(135deg,#a3e635,#db2777);transition:width 0.3s}
-.btn-sell{width:100%;padding:12px;border:0;border-radius:12px;color:white;font-weight:bold;cursor:pointer;background:linear-gradient(180deg,#f472b6,#db2777);font-family:inherit;margin-top:15px}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(2,6,23,.72);z-index:1000;align-items:center;justify-content:center;padding:16px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(2,6,23,.72);z-index:1000;align-items:flex-end;justify-content:center;padding:12px}
 .modal-overlay.open{display:flex}
-.modal{width:100%;max-width:420px;background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid rgba(255,255,255,.2);border-radius:22px;padding:22px}
+.modal{width:100%;max-width:520px;max-height:92vh;overflow:auto;background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid rgba(255,255,255,.2);border-radius:22px;padding:22px;margin-bottom:8px}
 .modal h3{margin:0 0 8px;font-size:20px}
-.modal .product-name{color:#fcd34d;margin:0 0 16px;font-weight:bold}
-.modal label{display:block;margin:0 0 6px;color:#f9a8d4;font-size:14px}
-.modal input{width:100%;padding:12px;border:0;border-radius:12px;margin:0 0 14px;font-size:16px;text-align:center;font-family:inherit}
+.modal label{display:block;margin:0 0 6px;color:#f9a8d4;font-size:14px;font-weight:700}
+.suggest-box{position:relative;margin:0 0 16px}
+.suggest-box input{width:100%;padding:12px;border:0;border-radius:12px;font-size:16px;text-align:center;font-family:inherit}
+.suggest-list{display:none;position:absolute;top:calc(100% + 4px);right:0;left:0;background:#1e293b;border:1px solid rgba(255,255,255,.2);border-radius:12px;max-height:180px;overflow-y:auto;z-index:6;box-shadow:0 12px 24px rgba(0,0,0,.28)}
+.suggest-list.open{display:block}
+.suggest-item{padding:10px 12px;cursor:pointer;font-weight:700}
+.suggest-item:hover{background:rgba(244,114,182,.28)}
+.suggest-hint{font-size:12px;color:#cbd5e1;margin:6px 0 0}
+.sell-list{max-height:42vh;overflow-y:auto;margin:0 0 14px;padding:2px}
+.sell-item{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.sell-item .pname{flex:1;font-weight:700;text-align:right}
+.sell-item input{width:88px;padding:10px;border:0;border-radius:10px;text-align:center;font-family:inherit;font-size:16px}
 .modal-actions{display:flex;gap:10px}
 .modal-actions button{flex:1;padding:12px;border:0;border-radius:12px;color:white;font-weight:bold;cursor:pointer;font-family:inherit}
 .btn-cancel{background:rgba(255,255,255,.18)}
 .btn-confirm{background:linear-gradient(180deg,#f472b6,#db2777)}
+.fab-sell{position:fixed;right:18px;bottom:22px;z-index:920;width:64px;height:64px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:linear-gradient(180deg,#f472b6,#db2777);color:#fff;font-size:30px;font-weight:800;cursor:pointer;box-shadow:0 12px 28px rgba(219,39,119,.45);font-family:inherit;line-height:1}
+.fab-sell:active{transform:scale(.96)}
 .back-top{position:fixed;left:18px;bottom:22px;z-index:900;width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);color:#fff;font-size:24px;font-weight:bold;display:none;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 10px 24px rgba(0,0,0,.18)}
 .back-top.show{display:flex}
-@media(max-width:600px){.container{padding:10px}.logo{font-size:21px}.card{padding:13px}.sell-grid{grid-template-columns:1fr}.widget .num{font-size:20px}}
+@media(max-width:600px){
+  .container{padding:10px}
+  .logo{font-size:21px}
+  .card{padding:13px}
+  .sell-grid{grid-template-columns:1fr}
+  .widgets{grid-template-columns:1fr 1fr;gap:10px}
+  .widget{aspect-ratio:1;min-height:0;height:auto;padding:14px;border-radius:22px;justify-content:center}
+  .widget h3{font-size:13px}
+  .widget .sub{font-size:11px}
+  .widget .num{font-size:17px;margin-top:8px}
+  .widget .icon{font-size:28px;left:10px;bottom:8px}
+}
 </style>
 </head>
 <body>
@@ -127,14 +164,14 @@ body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(c
     <div class="header">
         <div class="logo">💊 Medical Sales</div>
         <div class="nav">
-            <a class="btn-nav-sell" href="#section-sell">البيع</a>
-            <a class="btn-nav-reports" href="reports.php">التقارير</a>
-            <a class="btn-nav-pharmacies" href="reports.php#section-pharmacies">الصيدليات</a>
+            <a class="btn-nav-dash active" href="dashboard.php">الداشبورد</a>
             <a class="btn-nav-products" href="products.php">إدارة المنتجات</a>
+            <a class="btn-nav-sales" href="reports.php#section-sales">المبيعات</a>
+            <a class="btn-nav-pharmacies" href="reports.php#section-pharmacies">الصيدليات</a>
         </div>
     </div>
 
-    <?php if($msg): ?><div class="msg"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
+    <?php if($msg): ?><div class="msg<?= strpos($msg, '❌') !== false ? ' err' : '' ?>"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
 
     <input class="search" id="searchBox" placeholder="🔍 ابحث عن المنتج...">
 
@@ -162,7 +199,7 @@ body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(c
     </div>
 
     <div class="card" id="section-sell">
-        <h2>البيع المباشر والمتابعة</h2>
+        <h2>متابعة المنتجات</h2>
         <div class="sell-grid">
         <?php foreach($products as $p):
             $targetQty = (int)($p['target_qty'] ?? 0);
@@ -189,8 +226,6 @@ body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(c
                     <div class="progress-text"><?= $percent ?>%</div>
                     <div class="bar" style="width:<?= $percent ?>%"></div>
                 </div>
-                <button type="button" class="btn-sell"
-                    onclick="openSellModal('<?= htmlspecialchars($p['id'], ENT_QUOTES) ?>', '<?= htmlspecialchars($p['name'], ENT_QUOTES) ?>')">بيع</button>
             </div>
         <?php endforeach; ?>
         </div>
@@ -200,41 +235,114 @@ body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(c
 <div class="modal-overlay" id="sellModal" onclick="if(event.target===this) closeSellModal()">
     <div class="modal">
         <h3>تسجيل بيع</h3>
-        <p class="product-name" id="sellProductName"></p>
-        <form method="post">
-            <input type="hidden" name="id" id="sellProductId">
+        <form method="post" id="sellForm" onsubmit="return validateSell()">
             <label for="pharmacyInput">اسم الصيدلية</label>
-            <input type="text" name="pharmacy" id="pharmacyInput" placeholder="أدخل اسم الصيدلية" required>
-            <label for="sellQtyInput">العدد</label>
-            <input type="number" name="sell_qty" id="sellQtyInput" min="1" placeholder="أدخل الكمية" required>
+            <div class="suggest-box">
+                <input type="text" name="pharmacy" id="pharmacyInput" placeholder="اكتب اسم الصيدلية" autocomplete="off" required>
+                <div class="suggest-list" id="suggestList"></div>
+                <div class="suggest-hint" id="suggestHint">اكتب للبحث، أو أدخل اسماً جديداً لإضافته.</div>
+            </div>
+            <label>الأدوية والكمية</label>
+            <div class="sell-list">
+                <?php foreach($products as $p): ?>
+                <div class="sell-item">
+                    <span class="pname"><?= htmlspecialchars($p['name']) ?></span>
+                    <input type="number" name="qty[<?= htmlspecialchars($p['id']) ?>]" min="0" step="1" placeholder="0" inputmode="numeric">
+                </div>
+                <?php endforeach; ?>
+            </div>
             <div class="modal-actions">
                 <button type="button" class="btn-cancel" onclick="closeSellModal()">إلغاء</button>
-                <button class="btn-confirm" name="sell">تأكيد البيع</button>
+                <button class="btn-confirm" name="sell_batch" value="1">تأكيد</button>
             </div>
         </form>
     </div>
 </div>
 
+<button type="button" class="fab-sell" onclick="openSellModal()" title="بيع">💊</button>
 <a href="#top" class="back-top" id="backTop" title="العودة للأعلى">↑</a>
 
 <script>
+const pharmacies = <?= json_encode($pharmacyNames, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+const pharmacyInput = document.getElementById('pharmacyInput');
+const suggestList = document.getElementById('suggestList');
+const suggestHint = document.getElementById('suggestHint');
+
 document.getElementById('searchBox').addEventListener('input', function() {
     let q = this.value.toLowerCase();
     document.querySelectorAll('.sell-card').forEach(c => {
         c.style.display = c.dataset.name.includes(q) ? 'block' : 'none';
     });
 });
-function openSellModal(id, name) {
-    document.getElementById('sellProductId').value = id;
-    document.getElementById('sellProductName').textContent = name;
-    document.getElementById('pharmacyInput').value = '';
-    document.getElementById('sellQtyInput').value = '';
+
+function openSellModal() {
     document.getElementById('sellModal').classList.add('open');
-    document.getElementById('pharmacyInput').focus();
+    pharmacyInput.value = '';
+    suggestList.classList.remove('open');
+    suggestList.innerHTML = '';
+    document.querySelectorAll('#sellForm input[type="number"]').forEach(i => i.value = '');
+    suggestHint.textContent = 'اكتب للبحث، أو أدخل اسماً جديداً لإضافته.';
+    pharmacyInput.focus();
 }
 function closeSellModal() {
     document.getElementById('sellModal').classList.remove('open');
 }
+function validateSell() {
+    const pharmacy = pharmacyInput.value.trim();
+    if (!pharmacy) {
+        alert('أدخل اسم الصيدلية');
+        pharmacyInput.focus();
+        return false;
+    }
+    let hasQty = false;
+    document.querySelectorAll('#sellForm input[type="number"]').forEach(i => {
+        if (parseInt(i.value, 10) > 0) hasQty = true;
+    });
+    if (!hasQty) {
+        alert('أدخل كمية لمنتج واحد على الأقل');
+        return false;
+    }
+    return true;
+}
+function renderSuggestions(q) {
+    const query = (q || '').trim().toLowerCase();
+    suggestList.innerHTML = '';
+    if (!query) {
+        suggestList.classList.remove('open');
+        suggestHint.textContent = 'اكتب للبحث، أو أدخل اسماً جديداً لإضافته.';
+        return;
+    }
+    const matches = pharmacies.filter(name => name.toLowerCase().includes(query));
+    if (!matches.length) {
+        suggestList.classList.remove('open');
+        suggestHint.textContent = 'صيدلية جديدة — سيتم إضافتها عند التأكيد.';
+        return;
+    }
+    matches.forEach(name => {
+        const item = document.createElement('div');
+        item.className = 'suggest-item';
+        item.textContent = name;
+        item.onmousedown = function(e) {
+            e.preventDefault();
+            pharmacyInput.value = name;
+            suggestList.classList.remove('open');
+            suggestHint.textContent = 'صيدلية موجودة.';
+        };
+        suggestList.appendChild(item);
+    });
+    suggestList.classList.add('open');
+    const exact = matches.some(name => name.toLowerCase() === query);
+    suggestHint.textContent = exact ? 'صيدلية موجودة.' : 'اختر من الاقتراحات، أو اترك الاسم جديداً ليُضاف.';
+}
+pharmacyInput.addEventListener('input', function() {
+    renderSuggestions(this.value);
+});
+pharmacyInput.addEventListener('focus', function() {
+    renderSuggestions(this.value);
+});
+pharmacyInput.addEventListener('blur', function() {
+    setTimeout(() => suggestList.classList.remove('open'), 150);
+});
 const backTop = document.getElementById('backTop');
 window.addEventListener('scroll', function() {
     if (window.scrollY > 280) backTop.classList.add('show');

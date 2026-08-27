@@ -97,13 +97,15 @@ if (isset($_GET['msg'])) {
 *{box-sizing:border-box}
 body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(circle at top,#0ea5e9,#0f172a 45%,#020617);color:white;min-height:100vh}
 .container{width:100%;max-width:1300px;margin:auto;padding:16px}
-.header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:20px}
+.header{position:sticky;top:0;z-index:850;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin:0 0 16px;padding:12px 0 14px;background:linear-gradient(180deg,rgba(2,6,23,.94),rgba(2,6,23,.78) 70%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 .logo{font-size:28px;font-weight:bold}
 .nav{display:flex;gap:8px;flex-wrap:wrap}
 .nav a{color:#f8fafc;text-decoration:none;padding:11px 16px;border-radius:999px;font-weight:700;display:inline-block;border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 8px 20px rgba(0,0,0,.12)}
+.nav a.active{box-shadow:0 0 0 2px rgba(255,255,255,.28),0 8px 20px rgba(0,0,0,.12);border-color:rgba(255,255,255,.7)}
 .btn-nav-dash{background:rgba(255,200,160,.28)}
-.btn-nav-reports{background:rgba(196,181,253,.28)}
 .btn-nav-products{background:rgba(190,242,100,.25)}
+.btn-nav-sales{background:rgba(196,181,253,.28)}
+.btn-nav-pharmacies{background:rgba(249,168,212,.28)}
 .msg{background:#22c55e;padding:14px;border-radius:16px;margin-bottom:18px;font-weight:bold}
 .card{background:rgba(255,255,255,.12);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.18);border-radius:24px;padding:18px;margin-bottom:22px}
 .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:14px}
@@ -131,8 +133,9 @@ tr td:last-child{border-radius:14px 0 0 14px}
         <div class="logo">💊 Medical Sales</div>
         <div class="nav">
             <a class="btn-nav-dash" href="dashboard.php">الداشبورد</a>
-            <a class="btn-nav-reports" href="reports.php">التقارير</a>
-            <a class="btn-nav-products" href="products.php">إدارة المنتجات</a>
+            <a class="btn-nav-products active" href="products.php">إدارة المنتجات</a>
+            <a class="btn-nav-sales" href="reports.php#section-sales">المبيعات</a>
+            <a class="btn-nav-pharmacies" href="reports.php#section-pharmacies">الصيدليات</a>
         </div>
     </div>
 

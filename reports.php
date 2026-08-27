@@ -77,7 +77,11 @@ foreach ($sales as $s) {
     $pharmacyReport[$pharmacyName]['qty'] += $qty;
     $pharmacyReport[$pharmacyName]['total'] += $total;
 }
-ksort($pharmacyReport, SORT_STRING);
+uasort($pharmacyReport, function ($a, $b) {
+    $cmp = ($b['total'] <=> $a['total']);
+    if ($cmp !== 0) return $cmp;
+    return ($b['qty'] <=> $a['qty']);
+});
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -92,18 +96,18 @@ ksort($pharmacyReport, SORT_STRING);
 *{box-sizing:border-box}html{scroll-behavior:smooth}
 body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(circle at top,#0ea5e9,#0f172a 45%,#020617);color:white;min-height:100vh}
 .container{width:100%;max-width:1300px;margin:auto;padding:16px}
-.header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.header{position:sticky;top:0;z-index:850;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin:0 0 16px;padding:12px 0 14px;background:linear-gradient(180deg,rgba(2,6,23,.94),rgba(2,6,23,.78) 70%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 .logo{font-size:28px;font-weight:bold}
 .nav{display:flex;gap:8px;flex-wrap:wrap}
 .nav a{color:#f8fafc;text-decoration:none;padding:11px 16px;border-radius:999px;font-weight:700;display:inline-block;transition:transform .15s ease;border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 8px 20px rgba(0,0,0,.12)}
 .nav a:hover{transform:translateY(-2px)}
+.nav a.active{box-shadow:0 0 0 2px rgba(255,255,255,.28),0 8px 20px rgba(0,0,0,.12);border-color:rgba(255,255,255,.7)}
 .btn-nav-dash{background:rgba(255,200,160,.28)}
-.btn-nav-report{background:rgba(196,181,253,.28)}
-.btn-nav-pharmacies{background:rgba(249,168,212,.28)}
-.btn-nav-sales{background:rgba(255,195,205,.28)}
 .btn-nav-products{background:rgba(190,242,100,.25)}
+.btn-nav-sales{background:rgba(196,181,253,.28)}
+.btn-nav-pharmacies{background:rgba(249,168,212,.28)}
 .msg{background:#22c55e;padding:14px;border-radius:16px;margin-bottom:18px;font-weight:bold}
-.card{background:rgba(255,255,255,.12);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.18);border-radius:24px;padding:18px;margin-bottom:22px;scroll-margin-top:18px}
+.card{background:rgba(255,255,255,.12);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.18);border-radius:24px;padding:18px;margin-bottom:22px;scroll-margin-top:88px}
 .table-wrap{width:100%;padding-bottom:8px}
 table{width:100%;border-collapse:separate;border-spacing:0 10px}
 th{text-align:center;color:#bfdbfe;padding:10px}
@@ -140,10 +144,9 @@ tr td:last-child{border-radius:14px 0 0 14px}
         <div class="logo">📊 التقارير</div>
         <div class="nav">
             <a class="btn-nav-dash" href="dashboard.php">الداشبورد</a>
-            <a class="btn-nav-report" href="#section-report">تقرير المنتجات</a>
-            <a class="btn-nav-pharmacies" href="#section-pharmacies">الصيدليات</a>
-            <a class="btn-nav-sales" href="#section-sales">آخر المبيعات</a>
             <a class="btn-nav-products" href="products.php">إدارة المنتجات</a>
+            <a class="btn-nav-sales" id="navSales" href="reports.php#section-sales">المبيعات</a>
+            <a class="btn-nav-pharmacies" id="navPharmacies" href="reports.php#section-pharmacies">الصيدليات</a>
         </div>
     </div>
 
@@ -167,6 +170,7 @@ tr td:last-child{border-radius:14px 0 0 14px}
 
     <div class="card" id="section-pharmacies">
         <h2>الصيدليات</h2>
+        <p style="color:#f9a8d4;margin:0 0 12px;font-size:14px;font-weight:700;">مرتبة من الأعلى مبيعاتاً إلى الأقل.</p>
         <?php if (empty($pharmacyReport)): ?>
             <p style="color:#f9a8d4;margin:0;">لا توجد مبيعات بعد.</p>
         <?php else: ?>
@@ -252,6 +256,16 @@ window.addEventListener('scroll', function() {
     if (window.scrollY > 280) backTop.classList.add('show');
     else backTop.classList.remove('show');
 });
+function markNav() {
+    const sales = document.getElementById('navSales');
+    const pharmacies = document.getElementById('navPharmacies');
+    sales.classList.remove('active');
+    pharmacies.classList.remove('active');
+    if (location.hash === '#section-pharmacies') pharmacies.classList.add('active');
+    else sales.classList.add('active');
+}
+markNav();
+window.addEventListener('hashchange', markNav);
 </script>
 </body>
 </html>
