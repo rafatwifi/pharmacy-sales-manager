@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Medical Sales</title>
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;font-family:Tahoma,'Noto Naskh Arabic',sans-serif;background:radial-gradient(circle at top,#0ea5e9,#0f172a 45%,#020617);color:white;min-height:100vh;padding-bottom:96px}
+.container{width:100%;max-width:1300px;margin:auto;padding:16px}
+.header{position:sticky;top:0;z-index:850;display:flex;flex-direction:column;align-items:stretch;gap:10px;margin:0 0 16px;padding:10px 0 12px;background:linear-gradient(180deg,rgba(2,6,23,.96),rgba(2,6,23,.84) 78%,transparent)}
+.logo{font-size:24px;font-weight:bold}
+.nav{display:flex;flex-wrap:nowrap;gap:4px;width:100%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:18px;padding:5px}
+.nav a{flex:1 1 0;min-width:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#e2e8f0;text-decoration:none;padding:11px 6px;border-radius:14px;font-weight:800;font-size:13px}
+.nav a.active{color:#fff;box-shadow:0 8px 18px rgba(0,0,0,.18)}
+.btn-nav-dash.active{background:linear-gradient(180deg,rgba(255,200,160,.55),rgba(251,146,60,.38))}
+.btn-nav-products.active{background:linear-gradient(180deg,rgba(190,242,100,.50),rgba(132,204,22,.32))}
+.btn-nav-sales.active{background:linear-gradient(180deg,rgba(196,181,253,.55),rgba(139,92,246,.34))}
+.btn-nav-pharmacies.active{background:linear-gradient(180deg,rgba(249,168,212,.55),rgba(236,72,153,.34))}
+.search{width:100%;padding:14px;border:0;border-radius:16px;margin:0 0 18px;font-size:16px;outline:none;font-family:inherit}
+.widgets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.widget{position:relative;overflow:hidden;border-radius:20px;color:#f8fafc;min-height:86px;padding:12px 13px;display:flex;flex-direction:column;justify-content:space-between;border:1px solid rgba(255,255,255,.34)}
+.widget h3{margin:0;font-size:13px;font-weight:700;position:relative;z-index:1}
+.widget .sub{font-size:11px;opacity:.82;margin-top:3px}
+.widget .num{font-size:16px;font-weight:800;margin-top:6px;position:relative;z-index:1}
+.widget .icon{position:absolute;left:10px;bottom:6px;font-size:26px;opacity:.22}
+.c-coral{background:linear-gradient(145deg,rgba(255,186,160,.38),rgba(255,255,255,.12))}
+.c-lime{background:linear-gradient(145deg,rgba(196,230,168,.36),rgba(255,255,255,.12))}
+.c-pink{background:linear-gradient(145deg,rgba(255,190,220,.36),rgba(255,255,255,.12))}
+.c-amber{background:linear-gradient(145deg,rgba(255,224,160,.36),rgba(255,255,255,.12))}
+.msg{background:#22c55e;padding:14px;border-radius:16px;margin-bottom:18px;font-weight:bold}
+.msg.err{background:#e11d48}
+.card{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:24px;padding:14px;margin-bottom:22px}
+.sell-grid{display:grid;grid-template-columns:1fr;gap:14px}
+.sell-card{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:14px;cursor:pointer}
+.sell-card img{width:100%;height:150px;object-fit:cover;border-radius:16px;margin-bottom:10px;background:rgba(255,255,255,.12)}
+.card-hint{margin-top:10px;font-size:12px;color:#f9a8d4;font-weight:700;text-align:center}
+.row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.12);font-size:15px}
+.row b{color:#facc15}
+.progress{height:22px;border-radius:20px;background:rgba(255,255,255,.2);overflow:hidden;margin-top:15px;position:relative}
+.progress-text{position:absolute;width:100%;text-align:center;line-height:22px;font-size:13px;font-weight:bold;z-index:2}
+.bar{height:100%;background:linear-gradient(135deg,#a3e635,#db2777)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(2,6,23,.72);z-index:1000;align-items:stretch;justify-content:center;padding:6px}
+.modal-overlay.open{display:flex}
+.modal{width:100%;max-width:520px;max-height:92vh;overflow:auto;background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid rgba(255,255,255,.2);border-radius:22px;padding:22px}
+.modal-sell{max-width:720px;width:min(720px,100%);flex:1;overflow:hidden;display:flex;flex-direction:column;padding:12px;border-radius:18px}
+.sell-form{display:flex;flex-direction:column;flex:1;min-height:0}
+.modal h3{margin:0 0 8px;font-size:20px}
+.modal label{display:block;margin:0 0 6px;color:#f9a8d4;font-size:14px;font-weight:700}
+.suggest-box{position:relative;margin:0 0 12px}
+.suggest-box input,.form-grid input,input[type=text],input[type=number],input[type=file]{width:100%;padding:12px;border:0;border-radius:12px;font-size:16px;font-family:inherit}
+.suggest-box input{text-align:center}
+.suggest-list{display:none;position:absolute;top:calc(100% + 4px);right:0;left:0;background:#1e293b;border:1px solid rgba(255,255,255,.2);border-radius:12px;max-height:180px;overflow-y:auto;z-index:6}
+.suggest-list.open{display:block}
+.suggest-item{padding:10px 12px;cursor:pointer;font-weight:700}
+.suggest-hint{font-size:12px;color:#cbd5e1;margin:6px 0 0}
+.sell-list{flex:1 1 auto;min-height:62vh;overflow-y:auto;margin:0 0 12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;align-content:start}
+.sell-item{display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:8px 10px}
+.sell-item .pname{flex:1;font-weight:700;text-align:right;font-size:13px}
+.sell-item input{width:64px;padding:7px;text-align:center}
+.modal-actions{display:flex;gap:10px}
+.modal-actions button,.btn,.btn-edit,.btn-delete,.btn-reset{padding:12px;border:0;border-radius:12px;color:white;font-weight:bold;cursor:pointer;font-family:inherit}
+.modal-actions button{flex:1}
+.btn-cancel{background:rgba(255,255,255,.18)}
+.btn-confirm,.btn{background:linear-gradient(180deg,#f472b6,#db2777);width:100%}
+.pharm-row{display:flex;justify-content:space-between;gap:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px;margin-bottom:8px}
+.pharm-row .pname{font-weight:800;color:#fcd34d}
+.pharm-row .meta{font-size:13px;color:#f9a8d4;font-weight:700}
+.empty-note{color:#cbd5e1;margin:8px 0 16px;font-weight:700}
+.fab-sell{position:fixed;right:18px;bottom:22px;z-index:920;width:64px;height:64px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:linear-gradient(180deg,#f472b6,#db2777);color:#fff;font-size:30px;box-shadow:0 12px 28px rgba(219,39,119,.45)}
+.form-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:14px}
+.table-wrap{width:100%;overflow-x:auto}
+table{width:100%;min-width:520px;border-collapse:separate;border-spacing:0 10px}
+th{text-align:center;color:#bfdbfe;padding:10px}
+td{background:rgba(255,255,255,.12);padding:12px;text-align:center}
+.prod-img{width:60px;height:60px;object-fit:cover;border-radius:10px;background:#334155;display:inline-block}
+.btn-edit{background:linear-gradient(180deg,#fcd34d,#f59e0b);width:100%;margin-bottom:5px}
+.btn-delete{background:linear-gradient(180deg,#fda4af,#e11d48);width:100%}
+.btn-reset{width:100%;background:linear-gradient(180deg,#ff8a65,#ff3d00);font-size:17px}
+.pharmacy-grid{display:grid;grid-template-columns:1fr;gap:14px}
+.pharmacy-block{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:18px;padding:14px}
+.pharmacy-block h3{margin:0 0 10px;color:#fcd34d}
+.pharmacy-meta{display:flex;justify-content:space-between;gap:8px;margin-bottom:10px;color:#f9a8d4;font-size:13px;font-weight:bold}
+.page{display:none}
+.page.active{display:block}
+.sale-pharmacy,.sale-input{width:100%;max-width:130px;padding:8px;border:0;border-radius:10px;text-align:center;font-family:inherit}
+.edit-form{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center}
+</style>
+</head>
+<body>
+<div class="container" id="top">
+  <div class="header">
+    <div class="logo" id="pageLogo">💊 Medical Sales</div>
+    <div class="nav">
+      <a href="#dashboard" class="btn-nav-dash active" data-page="dashboard">الداشبورد</a>
+      <a href="#products" class="btn-nav-products" data-page="products">المنتجات</a>
+      <a href="#sales" class="btn-nav-sales" data-page="sales">المبيعات</a>
+      <a href="#pharmacies" class="btn-nav-pharmacies" data-page="pharmacies">الصيدليات</a>
+    </div>
+  </div>
+  <div id="flash"></div>
+
+  <section class="page active" id="page-dashboard">
+    <input class="search" id="searchBox" placeholder="🔍 ابحث عن المنتج...">
+    <div class="widgets" id="widgets"></div>
+    <div class="card"><h2>متابعة المنتجات</h2><div class="sell-grid" id="productCards"></div></div>
+  </section>
+
+  <section class="page" id="page-products">
+    <div class="card">
+      <h2>إضافة منتج جديد</h2>
+      <form id="addProductForm">
+        <div class="form-grid">
+          <input type="text" id="add_name" placeholder="اسم المنتج" required>
+          <input type="number" id="add_price" placeholder="السعر (د.ع)" required>
+          <input type="number" id="add_target" placeholder="التاركت المطلوب (عدد القطع)" required>
+          <input type="file" id="add_image" accept="image/*">
+        </div>
+        <button class="btn" type="submit">إضافة المنتج</button>
+      </form>
+    </div>
+    <div class="card"><h2>قائمة المنتجات</h2><div class="table-wrap" id="productsTable"></div></div>
+  </section>
+
+  <section class="page" id="page-sales">
+    <div class="card"><h2>تقرير المبيعات حسب المنتج</h2><div class="table-wrap" id="productReport"></div></div>
+    <div class="card"><h2>آخر عمليات البيع</h2><div class="table-wrap" id="salesTable"></div></div>
+    <div class="card"><button class="btn-reset" type="button" id="resetSales">تصفير كافة المبيعات</button></div>
+  </section>
+
+  <section class="page" id="page-pharmacies">
+    <div class="card">
+      <h2>الصيدليات</h2>
+      <p style="color:#f9a8d4;margin:0 0 12px;font-size:14px;font-weight:700;">مرتبة من الأعلى مبيعاتاً إلى الأقل.</p>
+      <div id="pharmaciesWrap"></div>
+    </div>
+  </section>
+</div>
+
+<button type="button" class="fab-sell" id="fabSell" title="بيع">💊</button>
+
+<div class="modal-overlay" id="sellModal">
+  <div class="modal modal-sell">
+    <h3>تسجيل بيع</h3>
+    <div class="sell-form">
+      <label>اسم الصيدلية</label>
+      <div class="suggest-box">
+        <input type="text" id="pharmacyInput" placeholder="اكتب اسم الصيدلية" autocomplete="off">
+        <div class="suggest-list" id="suggestList"></div>
+        <div class="suggest-hint" id="suggestHint">اكتب للبحث، أو أدخل اسماً جديداً لإضافته.</div>
+      </div>
+      <label>الأدوية والكمية</label>
+      <div class="sell-list" id="sellList"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" id="cancelSell">إلغاء</button>
+        <button type="button" class="btn-confirm" id="confirmSell">تأكيد</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="productModal">
+  <div class="modal">
+    <h3 id="productModalTitle"></h3>
+    <p class="suggest-hint" style="margin:0 0 12px;">الصيدليات التي تم البيع لها</p>
+    <div id="productModalList"></div>
+    <div class="modal-actions"><button type="button" class="btn-cancel" id="closeProductModal">إغلاق</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h3>تعديل المنتج</h3>
+    <input type="hidden" id="edit_id">
+    <div class="form-grid">
+      <input type="text" id="edit_name" placeholder="اسم المنتج">
+      <input type="number" id="edit_price" placeholder="السعر">
+      <input type="number" id="edit_target" placeholder="التاركت (عدد القطع)">
+      <label style="font-size:14px;color:#cbd5e1;">تغيير الصورة (اختياري)</label>
+      <input type="file" id="edit_image" accept="image/*">
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-cancel" id="cancelEdit">إلغاء</button>
+      <button type="button" class="btn-confirm" id="saveEdit" style="background:linear-gradient(180deg,#fcd34d,#f59e0b)">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SEED = [{"id":"678a1b2c3d001","name":"Omegalic","price":7600,"target_qty":500,"image":""},{"id":"678a1b2c3d002","name":"Nutra Sleep","price":12000,"target_qty":300,"image":""},{"id":"678a1b2c3d003","name":"Breeky","price":8500,"target_qty":400,"image":""},{"id":"678a1b2c3d004","name":"ALBUVEN","price":15000,"target_qty":200,"image":""},{"id":"678a1b2c3d005","name":"Vit-D3 Plus","price":6500,"target_qty":350,"image":""},{"id":"678a1b2c3d006","name":"Calcium Forte","price":9000,"target_qty":250,"image":""},{"id":"678a1b2c3d007","name":"Iron Max","price":5500,"target_qty":450,"image":""},{"id":"678a1b2c3d008","name":"Probiotic Balance","price":11000,"target_qty":280,"image":""},{"id":"678a1b2c3d009","name":"Joint Flex","price":13500,"target_qty":220,"image":""},{"id":"678a1b2c3d010","name":"Immune Boost","price":7200,"target_qty":380,"image":""},{"id":"678a1b2c3d011","name":"Hair & Skin","price":9800,"target_qty":320,"image":""},{"id":"678a1b2c3d012","name":"Magnesium Calm","price":6800,"target_qty":360,"image":""},{"id":"678a1b2c3d013","name":"Omega Kids","price":8200,"target_qty":290,"image":""},{"id":"678a1b2c3d014","name":"Multivit Daily","price":7500,"target_qty":420,"image":""},{"id":"678a1b2c3d015","name":"Collagen Plus","price":14500,"target_qty":180,"image":""}];
+const KEY_P = 'ms_products';
+const KEY_S = 'ms_sales';
+
+function loadP(){ try { return JSON.parse(localStorage.getItem(KEY_P)||'null') || JSON.parse(JSON.stringify(SEED)); } catch(e){ return JSON.parse(JSON.stringify(SEED)); } }
+function loadS(){ try { return JSON.parse(localStorage.getItem(KEY_S)||'[]'); } catch(e){ return []; } }
+function saveP(v){ localStorage.setItem(KEY_P, JSON.stringify(v)); }
+function saveS(v){ localStorage.setItem(KEY_S, JSON.stringify(v)); }
+if (!localStorage.getItem(KEY_P)) saveP(SEED);
+if (!localStorage.getItem(KEY_S)) saveS([]);
+
+function esc(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function money(n){ return Number(n||0).toLocaleString('en-US'); }
+function nowDate(){ const d=new Date(),p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+function flash(t, err){ const el=document.getElementById('flash'); el.innerHTML = t ? '<div class="msg'+(err?' err':'')+'">'+esc(t)+'</div>' : ''; if(t) setTimeout(()=>{ el.innerHTML=''; }, 2500); }
+function compressImage(file, cb){
+  if(!file){ cb(''); return; }
+  const r=new FileReader();
+  r.onload=function(){ const img=new Image(); img.onload=function(){ const c=document.createElement('canvas'); let w=img.width,h=img.height,max=480; if(w>max){h=h*max/w;w=max;} c.width=w;c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); cb(c.toDataURL('image/jpeg',0.72)); }; img.src=r.result; };
+  r.readAsDataURL(file);
+}
+
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));
+  const link=document.querySelector('.nav a[data-page="'+name+'"]');
+  if(link) link.classList.add('active');
+  document.getElementById('fabSell').style.display = name==='dashboard' ? 'block' : 'none';
+  const titles={dashboard:'💊 Medical Sales',products:'💊 المنتجات',sales:'📊 المبيعات',pharmacies:'🏪 الصيدليات'};
+  document.getElementById('pageLogo').textContent = titles[name]||'💊 Medical Sales';
+  if(name==='dashboard') renderDashboard();
+  if(name==='products') renderProducts();
+  if(name==='sales') renderSales();
+  if(name==='pharmacies') renderPharmacies();
+}
+
+function productReport(){
+  const sales=loadS(), map={};
+  sales.forEach(s=>{ const n=s.product; if(!map[n]) map[n]={qty:0,total:0}; map[n].qty+=Number(s.qty); map[n].total+=Number(s.total); });
+  return map;
+}
+
+function renderDashboard(){
+  const products=loadP(), sales=loadS(), report=productReport();
+  const totalSales=sales.reduce((a,s)=>a+Number(s.total),0);
+  const totalTarget=products.reduce((a,p)=>a+Number(p.target_qty||0)*Number(p.price||0),0);
+  const remain=Math.max(0,totalTarget-totalSales);
+  const pct=totalTarget>0?Math.min(100,Math.round(totalSales/totalTarget*100)):0;
+  document.getElementById('widgets').innerHTML =
+    '<div class="widget c-coral"><div><h3>إجمالي المبيعات</h3><div class="sub">كل المبيعات</div></div><div class="num">'+money(totalSales)+' د.ع</div><div class="icon">💰</div></div>'+
+    '<div class="widget c-lime"><div><h3>التاركت الكلي</h3><div class="sub">الهدف المطلوب</div></div><div class="num">'+money(totalTarget)+' د.ع</div><div class="icon">🎯</div></div>'+
+    '<div class="widget c-pink"><div><h3>نسبة التاركت</h3><div class="sub">نسبة الإنجاز</div></div><div class="num">'+pct+'%</div><div class="icon">📈</div></div>'+
+    '<div class="widget c-amber"><div><h3>الباقي للتاركت</h3><div class="sub">المتبقي</div></div><div class="num">'+money(remain)+' د.ع</div><div class="icon">⏳</div></div>';
+  const q=(document.getElementById('searchBox').value||'').toLowerCase();
+  document.getElementById('productCards').innerHTML = products.filter(p=>!q||String(p.name).toLowerCase().includes(q)).map(p=>{
+    const tq=Number(p.target_qty||0), tv=tq*Number(p.price||0);
+    const sold=report[p.name]?report[p.name].qty:0, soldV=report[p.name]?report[p.name].total:0;
+    const pr=tq>0?Math.min(100,Math.round(sold/tq*100)):0;
+    const img=p.image?'<img src="'+p.image+'">':'<img alt="">';
+    return '<div class="sell-card" data-id="'+esc(p.id)+'" data-title="'+esc(p.name)+'">'+img+'<h3>'+esc(p.name)+'</h3>'+
+      '<div class="row"><span>السعر</span><b>'+money(p.price)+' د.ع</b></div>'+
+      '<div class="row"><span>التاركت المطلوب</span><b>'+money(tq)+' قطعة</b></div>'+
+      '<div class="row"><span>القطع المباعة</span><b>'+money(sold)+' قطعة</b></div>'+
+      '<div class="row"><span>القطع الباقية للتاركت</span><b>'+money(Math.max(0,tq-sold))+' قطعة</b></div>'+
+      '<div class="row"><span>السعر الباقي للتاركت</span><b>'+money(Math.max(0,tv-soldV))+' د.ع</b></div>'+
+      '<div class="progress"><div class="progress-text">'+pr+'%</div><div class="bar" style="width:'+pr+'%"></div></div>'+
+      '<div class="card-hint">اضغط لعرض الصيدليات</div></div>';
+  }).join('') || '<p class="empty-note">لا توجد منتجات.</p>';
+  document.querySelectorAll('#productCards .sell-card').forEach(c=>c.onclick=()=>openProductPharmacies(c.dataset.id,c.dataset.title));
+}
+
+function renderProducts(){
+  const products=loadP().slice().reverse();
+  document.getElementById('productsTable').innerHTML = '<table><tr><th>الصورة</th><th>الاسم</th><th>السعر</th><th>تاركت القطع</th><th>الإجراءات</th></tr>'+
+    products.map(p=>'<tr><td>'+(p.image?'<img class="prod-img" src="'+p.image+'">':'<div class="prod-img"></div>')+'</td><td>'+esc(p.name)+'</td><td>'+money(p.price)+' د.ع</td><td>'+money(p.target_qty)+' قطعة</td><td style="width:120px"><button class="btn-edit" data-id="'+esc(p.id)+'">تعديل</button><button class="btn-delete" data-id="'+esc(p.id)+'">حذف</button></td></tr>').join('')+'</table>';
+  document.querySelectorAll('#productsTable .btn-edit').forEach(b=>b.onclick=()=>openEdit(b.dataset.id));
+  document.querySelectorAll('#productsTable .btn-delete').forEach(b=>b.onclick=()=>{
+    if(!confirm('متأكد من حذف المنتج؟')) return;
+    saveP(loadP().filter(p=>p.id!==b.dataset.id)); flash('تم حذف المنتج بنجاح ✅'); renderProducts();
+  });
+}
+
+function renderSales(){
+  const sales=loadS(), report=productReport();
+  document.getElementById('productReport').innerHTML='<table><tr><th>المنتج</th><th>إجمالي القطع المباعة</th><th>إجمالي البيع</th></tr>'+
+    Object.keys(report).map(n=>'<tr><td>'+esc(n)+'</td><td>'+money(report[n].qty)+' قطعة</td><td>'+money(report[n].total)+' د.ع</td></tr>').join('')+'</table>';
+  const rows=sales.map((s,i)=>({s,i})).reverse();
+  document.getElementById('salesTable').innerHTML='<table><tr><th>المنتج</th><th>اسم الصيدلية</th><th>الكمية</th><th>سعر القطعة</th><th>الإجمالي</th><th>التاريخ</th><th>تعديل</th><th>حذف</th></tr>'+
+    rows.map(({s,i})=>'<tr><td>'+esc(s.product)+'</td><td>'+esc(s.pharmacy||'غير محدد')+'</td><td>'+esc(s.qty)+'</td><td>'+money(s.price)+' د.ع</td><td>'+money(s.total)+' د.ع</td><td>'+esc(s.date)+'</td><td><div class="edit-form"><input class="sale-pharmacy" data-i="'+i+'" value="'+esc(s.pharmacy||'')+'"><input class="sale-input" type="number" min="1" data-i="'+i+'" value="'+esc(s.qty)+'"><button class="btn-edit" data-i="'+i+'">تعديل</button></div></td><td><button class="btn-delete" data-i="'+i+'">حذف</button></td></tr>').join('')+'</table>';
+  document.querySelectorAll('#salesTable .btn-edit').forEach(b=>b.onclick=()=>{
+    const i=Number(b.dataset.i); const sales=loadS();
+    const ph=document.querySelector('#salesTable .sale-pharmacy[data-i="'+i+'"]').value.trim();
+    const qty=parseInt(document.querySelector('#salesTable .sale-input[data-i="'+i+'"]').value,10);
+    if(!ph||!(qty>0)) return alert('أدخل الصيدلية والكمية');
+    sales[i].pharmacy=ph; sales[i].qty=qty; sales[i].total=qty*Number(sales[i].price); sales[i].date=nowDate();
+    saveS(sales); flash('تم تعديل عملية البيع بنجاح ✅'); renderSales();
+  });
+  document.querySelectorAll('#salesTable .btn-delete').forEach(b=>b.onclick=()=>{
+    if(!confirm('متأكد تريد تحذف عملية البيع؟')) return;
+    const sales=loadS(); sales.splice(Number(b.dataset.i),1); saveS(sales); flash('تم حذف عملية البيع بنجاح ✅'); renderSales();
+  });
+}
+
+function renderPharmacies(){
+  const sales=loadS(), map={};
+  sales.forEach(s=>{
+    const ph=(s.pharmacy||'').trim()||'غير محدد'; const pn=s.product||'—';
+    if(!map[ph]) map[ph]={products:{},qty:0,total:0};
+    if(!map[ph].products[pn]) map[ph].products[pn]={qty:0,total:0};
+    map[ph].products[pn].qty+=Number(s.qty); map[ph].products[pn].total+=Number(s.total);
+    map[ph].qty+=Number(s.qty); map[ph].total+=Number(s.total);
+  });
+  const names=Object.keys(map).sort((a,b)=>map[b].total-map[a].total || map[b].qty-map[a].qty);
+  if(!names.length){ document.getElementById('pharmaciesWrap').innerHTML='<p class="empty-note">لا توجد مبيعات بعد.</p>'; return; }
+  document.getElementById('pharmaciesWrap').innerHTML='<div class="pharmacy-grid">'+names.map(ph=>{
+    const info=map[ph];
+    return '<div class="pharmacy-block"><h3>'+esc(ph)+'</h3><div class="pharmacy-meta"><span>الكمية: '+money(info.qty)+' قطعة</span><span>الإجمالي: '+money(info.total)+' د.ع</span></div><table><tr><th>المنتج</th><th>الكمية</th><th>القيمة</th></tr>'+
+      Object.keys(info.products).map(n=>'<tr><td>'+esc(n)+'</td><td>'+money(info.products[n].qty)+' قطعة</td><td>'+money(info.products[n].total)+' د.ع</td></tr>').join('')+'</table></div>';
+  }).join('')+'</div>';
+}
+
+function openSell(){
+  const products=loadP();
+  document.getElementById('pharmacyInput').value='';
+  document.getElementById('suggestHint').textContent='اكتب للبحث، أو أدخل اسماً جديداً لإضافته.';
+  document.getElementById('suggestList').classList.remove('open');
+  document.getElementById('sellList').innerHTML=products.map(p=>'<div class="sell-item"><span class="pname">'+esc(p.name)+'</span><input type="number" min="0" step="1" placeholder="0" data-id="'+esc(p.id)+'" inputmode="numeric"></div>').join('');
+  document.getElementById('sellModal').classList.add('open');
+  document.getElementById('pharmacyInput').focus();
+}
+function pharmaciesList(){ const set={}; loadS().forEach(s=>{ const n=(s.pharmacy||'').trim(); if(n) set[n]=1; }); return Object.keys(set).sort(); }
+function renderSuggestions(q){
+  const list=document.getElementById('suggestList'), hint=document.getElementById('suggestHint');
+  const query=(q||'').trim().toLowerCase(); list.innerHTML='';
+  if(!query){ list.classList.remove('open'); hint.textContent='اكتب للبحث، أو أدخل اسماً جديداً لإضافته.'; return; }
+  const matches=pharmaciesList().filter(n=>n.toLowerCase().includes(query));
+  if(!matches.length){ list.classList.remove('open'); hint.textContent='صيدلية جديدة — سيتم إضافتها عند التأكيد.'; return; }
+  matches.forEach(name=>{ const item=document.createElement('div'); item.className='suggest-item'; item.textContent=name; item.onmousedown=e=>{ e.preventDefault(); document.getElementById('pharmacyInput').value=name; list.classList.remove('open'); hint.textContent='صيدلية موجودة.'; }; list.appendChild(item); });
+  list.classList.add('open');
+  hint.textContent=matches.some(n=>n.toLowerCase()===query)?'صيدلية موجودة.':'اختر من الاقتراحات، أو اترك الاسم جديداً ليُضاف.';
+}
+function confirmSell(){
+  const pharmacy=document.getElementById('pharmacyInput').value.trim();
+  if(!pharmacy){ alert('أدخل اسم الصيدلية'); return; }
+  const products=loadP(), sales=loadS(); let added=0;
+  document.querySelectorAll('#sellList input').forEach(inp=>{
+    const qty=parseInt(inp.value,10)||0; if(qty<=0) return;
+    const p=products.find(x=>x.id===inp.dataset.id); if(!p) return;
+    sales.push({product_id:p.id,product:p.name,pharmacy,qty,price:Number(p.price),total:qty*Number(p.price),date:nowDate()}); added++;
+  });
+  if(!added){ alert('أدخل كمية لمنتج واحد على الأقل'); return; }
+  saveS(sales); document.getElementById('sellModal').classList.remove('open'); flash('تم تسجيل البيع بنجاح ✅'); renderDashboard();
+}
+function openProductPharmacies(id,title){
+  const sales=loadS(), map={};
+  sales.forEach(s=>{ if(String(s.product_id)!==String(id) && s.product!==title) return; const ph=(s.pharmacy||'').trim()||'غير محدد'; if(!map[ph]) map[ph]={qty:0,total:0}; map[ph].qty+=Number(s.qty); map[ph].total+=Number(s.total); });
+  const rows=Object.keys(map).map(ph=>({pharmacy:ph,...map[ph]})).sort((a,b)=>b.qty-a.qty||b.total-a.total);
+  document.getElementById('productModalTitle').textContent=title;
+  document.getElementById('productModalList').innerHTML = rows.length ? rows.map(r=>'<div class="pharm-row"><div class="pname">'+esc(r.pharmacy)+'</div><div class="meta">'+money(r.qty)+' قطعة — '+money(r.total)+' د.ع</div></div>').join('') : '<p class="empty-note">لا توجد مبيعات لهذا المنتج بعد.</p>';
+  document.getElementById('productModal').classList.add('open');
+}
+function openEdit(id){
+  const p=loadP().find(x=>x.id===id); if(!p) return;
+  document.getElementById('edit_id').value=p.id;
+  document.getElementById('edit_name').value=p.name;
+  document.getElementById('edit_price').value=p.price;
+  document.getElementById('edit_target').value=p.target_qty||0;
+  document.getElementById('edit_image').value='';
+  document.getElementById('editModal').classList.add('open');
+}
+
+document.querySelectorAll('.nav a').forEach(a=>a.onclick=e=>{ e.preventDefault(); location.hash=a.dataset.page; showPage(a.dataset.page); });
+window.addEventListener('hashchange',()=>showPage((location.hash||'#dashboard').slice(1)||'dashboard'));
+document.getElementById('searchBox').oninput=renderDashboard;
+document.getElementById('fabSell').onclick=openSell;
+document.getElementById('cancelSell').onclick=()=>document.getElementById('sellModal').classList.remove('open');
+document.getElementById('confirmSell').onclick=confirmSell;
+document.getElementById('sellModal').onclick=e=>{ if(e.target.id==='sellModal') e.currentTarget.classList.remove('open'); };
+document.getElementById('productModal').onclick=e=>{ if(e.target.id==='productModal') e.currentTarget.classList.remove('open'); };
+document.getElementById('closeProductModal').onclick=()=>document.getElementById('productModal').classList.remove('open');
+document.getElementById('pharmacyInput').addEventListener('input',e=>renderSuggestions(e.target.value));
+document.getElementById('pharmacyInput').addEventListener('focus',e=>renderSuggestions(e.target.value));
+document.getElementById('addProductForm').onsubmit=e=>{
+  e.preventDefault();
+  const name=document.getElementById('add_name').value.trim();
+  const price=Number(document.getElementById('add_price').value);
+  const target=Number(document.getElementById('add_target').value);
+  if(!name) return;
+  compressImage(document.getElementById('add_image').files[0], img=>{
+    const products=loadP(); products.push({id:uid(),name,price,target_qty:target,image:img}); saveP(products);
+    document.getElementById('addProductForm').reset(); flash('تم إضافة المنتج بنجاح ✅'); renderProducts();
+  });
+};
+document.getElementById('cancelEdit').onclick=()=>document.getElementById('editModal').classList.remove('open');
+document.getElementById('saveEdit').onclick=()=>{
+  const id=document.getElementById('edit_id').value;
+  const products=loadP(); const p=products.find(x=>x.id===id); if(!p) return;
+  p.name=document.getElementById('edit_name').value.trim(); p.price=Number(document.getElementById('edit_price').value); p.target_qty=Number(document.getElementById('edit_target').value);
+  const f=document.getElementById('edit_image').files[0];
+  const done=()=>{ saveP(products); document.getElementById('editModal').classList.remove('open'); flash('تم تعديل المنتج بنجاح ✅'); renderProducts(); };
+  if(f) compressImage(f, img=>{ p.image=img; done(); }); else done();
+};
+document.getElementById('resetSales').onclick=()=>{ if(!confirm('متأكد؟ سيتم تصفير المبيعات.')) return; saveS([]); flash('تم تصفير المبيعات ✅'); renderSales(); };
+showPage((location.hash||'#dashboard').slice(1)||'dashboard');
+</script>
+</body>
+</html>

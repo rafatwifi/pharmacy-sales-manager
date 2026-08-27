@@ -4,7 +4,10 @@ uploads/
 .env.*
 .DS_Store
 Thumbs.db
-
-123.zip
-
 123/
+123.zip
+android-app/local.properties
+android-app/.gradle/
+android-app/app/build/
+android-app/build/
+android-app/.idea/
