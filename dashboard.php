@@ -210,7 +210,7 @@ body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(c
             $remainingPiecesToTarget = max(0, $targetQty - $soldPieces);
             $remainingPriceToTarget = max(0, $targetValue - $soldValue);
         ?>
-            <div class="sell-card" data-name="<?= htmlspecialchars(mb_strtolower($p['name'])) ?>">
+            <div class="sell-card" data-name="<?= htmlspecialchars(strtolower($p['name'])) ?>">
                 <?php if(!empty($p['image'])): ?>
                     <img src="<?= $uploadPath . htmlspecialchars($p['image']) ?>">
                 <?php else: ?>
