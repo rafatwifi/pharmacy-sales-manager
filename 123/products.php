@@ -135,8 +135,8 @@ tr td:last-child{border-radius:14px 0 0 14px}
         <div class="nav">
             <a class="btn-nav-dash" href="dashboard.php">الداشبورد</a>
             <a class="btn-nav-products active" href="products.php">المنتجات</a>
-            <a class="btn-nav-sales" href="reports.php#section-sales">المبيعات</a>
-            <a class="btn-nav-pharmacies" href="reports.php#section-pharmacies">الصيدليات</a>
+            <a class="btn-nav-sales" href="reports.php">المبيعات</a>
+            <a class="btn-nav-pharmacies" href="pharmacies.php">الصيدليات</a>
         </div>
     </div>
 

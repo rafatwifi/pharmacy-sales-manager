@@ -209,8 +209,8 @@ body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(c
         <div class="nav">
             <a class="btn-nav-dash active" href="dashboard.php">الداشبورد</a>
             <a class="btn-nav-products" href="products.php">المنتجات</a>
-            <a class="btn-nav-sales" href="reports.php#section-sales">المبيعات</a>
-            <a class="btn-nav-pharmacies" href="reports.php#section-pharmacies">الصيدليات</a>
+            <a class="btn-nav-sales" href="reports.php">المبيعات</a>
+            <a class="btn-nav-pharmacies" href="pharmacies.php">الصيدليات</a>
         </div>
     </div>
 

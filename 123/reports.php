@@ -58,37 +58,13 @@ foreach ($sales as $s) {
     $productReport[$name]['qty'] += (int)$s['qty'];
     $productReport[$name]['total'] += (float)$s['total'];
 }
-
-$pharmacyReport = [];
-foreach ($sales as $s) {
-    $pharmacyName = trim((string)($s['pharmacy'] ?? ''));
-    if ($pharmacyName === '') $pharmacyName = 'غير محدد';
-    $productName = $s['product'] ?? '—';
-    if (!isset($pharmacyReport[$pharmacyName])) {
-        $pharmacyReport[$pharmacyName] = ['products' => [], 'qty' => 0, 'total' => 0];
-    }
-    if (!isset($pharmacyReport[$pharmacyName]['products'][$productName])) {
-        $pharmacyReport[$pharmacyName]['products'][$productName] = ['qty' => 0, 'total' => 0];
-    }
-    $qty = (int)$s['qty'];
-    $total = (float)$s['total'];
-    $pharmacyReport[$pharmacyName]['products'][$productName]['qty'] += $qty;
-    $pharmacyReport[$pharmacyName]['products'][$productName]['total'] += $total;
-    $pharmacyReport[$pharmacyName]['qty'] += $qty;
-    $pharmacyReport[$pharmacyName]['total'] += $total;
-}
-uasort($pharmacyReport, function ($a, $b) {
-    $cmp = ($b['total'] <=> $a['total']);
-    if ($cmp !== 0) return $cmp;
-    return ($b['qty'] <=> $a['qty']);
-});
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>التقارير</title>
+<title>المبيعات</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -129,10 +105,6 @@ tr td:last-child{border-radius:14px 0 0 14px}
 .btn-delete{background:linear-gradient(180deg,#fda4af,#e11d48);color:white;border:0;border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:bold;font-family:inherit}
 .edit-form{display:flex;flex-wrap:nowrap;gap:6px;justify-content:center;align-items:center}
 .btn-reset{width:100%;padding:12px;border:0;border-radius:12px;color:white;font-weight:bold;cursor:pointer;background:linear-gradient(180deg,#ff8a65,#ff3d00);font-size:17px;font-family:inherit}
-.pharmacy-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
-.pharmacy-block{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:18px;padding:14px}
-.pharmacy-block h3{margin:0 0 10px;color:#fcd34d;font-size:18px}
-.pharmacy-meta{display:flex;justify-content:space-between;gap:8px;margin-bottom:10px;color:#f9a8d4;font-size:13px;font-weight:bold}
 .back-top{position:fixed;left:18px;bottom:22px;z-index:900;width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);color:#fff;font-size:24px;font-weight:bold;display:none;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 10px 24px rgba(0,0,0,.18)}
 .back-top.show{display:flex}
 @media(max-width:600px){.container{padding:10px}.logo{font-size:21px}.nav a{font-size:11px;padding:9px 4px}.card{padding:13px}.report-table th,.report-table td{font-size:12px;padding:10px 4px}.sales-table{min-width:920px}}
@@ -141,12 +113,12 @@ tr td:last-child{border-radius:14px 0 0 14px}
 <body>
 <div class="container" id="top">
     <div class="header">
-        <div class="logo">📊 التقارير</div>
+        <div class="logo">📊 المبيعات</div>
         <div class="nav">
             <a class="btn-nav-dash" href="dashboard.php">الداشبورد</a>
             <a class="btn-nav-products" href="products.php">المنتجات</a>
-            <a class="btn-nav-sales" id="navSales" href="reports.php#section-sales">المبيعات</a>
-            <a class="btn-nav-pharmacies" id="navPharmacies" href="reports.php#section-pharmacies">الصيدليات</a>
+            <a class="btn-nav-sales active" href="reports.php">المبيعات</a>
+            <a class="btn-nav-pharmacies" href="pharmacies.php">الصيدليات</a>
         </div>
     </div>
 
@@ -166,38 +138,6 @@ tr td:last-child{border-radius:14px 0 0 14px}
                 <?php endforeach; ?>
             </table>
         </div>
-    </div>
-
-    <div class="card" id="section-pharmacies">
-        <h2>الصيدليات</h2>
-        <p style="color:#f9a8d4;margin:0 0 12px;font-size:14px;font-weight:700;">مرتبة من الأعلى مبيعاتاً إلى الأقل.</p>
-        <?php if (empty($pharmacyReport)): ?>
-            <p style="color:#f9a8d4;margin:0;">لا توجد مبيعات بعد.</p>
-        <?php else: ?>
-        <div class="pharmacy-grid">
-            <?php foreach ($pharmacyReport as $pharmacyName => $info): ?>
-            <div class="pharmacy-block">
-                <h3><?= htmlspecialchars($pharmacyName) ?></h3>
-                <div class="pharmacy-meta">
-                    <span>الكمية: <?= number_format($info['qty']) ?> قطعة</span>
-                    <span>الإجمالي: <?= number_format($info['total']) ?> د.ع</span>
-                </div>
-                <div class="table-wrap report-wrap">
-                    <table class="report-table">
-                        <tr><th>المنتج</th><th>الكمية</th><th>القيمة</th></tr>
-                        <?php foreach ($info['products'] as $productName => $pr): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($productName) ?></td>
-                            <td><?= number_format($pr['qty']) ?> قطعة</td>
-                            <td><?= number_format($pr['total']) ?> د.ع</td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </table>
-                </div>
-            </div>
-            <?php endforeach; ?>
-        </div>
-        <?php endif; ?>
     </div>
 
     <div class="card" id="section-sales">
@@ -256,16 +196,6 @@ window.addEventListener('scroll', function() {
     if (window.scrollY > 280) backTop.classList.add('show');
     else backTop.classList.remove('show');
 });
-function markNav() {
-    const sales = document.getElementById('navSales');
-    const pharmacies = document.getElementById('navPharmacies');
-    sales.classList.remove('active');
-    pharmacies.classList.remove('active');
-    if (location.hash === '#section-pharmacies') pharmacies.classList.add('active');
-    else sales.classList.add('active');
-}
-markNav();
-window.addEventListener('hashchange', markNav);
 </script>
 </body>
 </html>
