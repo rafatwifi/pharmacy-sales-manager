@@ -129,8 +129,8 @@ body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(c
 .btn-nav-sales.active{background:linear-gradient(180deg,rgba(196,181,253,.55),rgba(139,92,246,.34))}
 .btn-nav-pharmacies.active{background:linear-gradient(180deg,rgba(249,168,212,.55),rgba(236,72,153,.34))}
 .search{width:100%;padding:14px;border:0;border-radius:16px;margin:0 0 18px;font-size:16px;outline:none;font-family:inherit}
-.widgets{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:14px}
-.widget{position:relative;overflow:hidden;border-radius:28px;color:#f8fafc;min-height:122px;padding:18px 20px;display:flex;flex-direction:column;justify-content:space-between;border:1px solid rgba(255,255,255,.34);backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);box-shadow:0 12px 30px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.45)}
+.widgets{display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:14px;margin-bottom:14px}
+.widget{position:relative;overflow:hidden;border-radius:28px;color:#f8fafc;min-height:110px;padding:16px 18px;display:flex;flex-direction:column;justify-content:space-between;border:1px solid rgba(255,255,255,.34);backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);box-shadow:0 12px 30px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.45)}
 .widget::before{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle at 20% 15%,rgba(255,255,255,.42),transparent 42%),radial-gradient(circle at 85% 80%,rgba(255,255,255,.12),transparent 40%);pointer-events:none}
 .widget h3{margin:0;font-size:15px;font-weight:700;position:relative;z-index:1}
 .widget .sub{font-size:12px;opacity:.82;margin-top:3px;position:relative;z-index:1}
@@ -153,23 +153,25 @@ body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(c
 .progress{height:22px;border-radius:20px;background:rgba(255,255,255,.2);overflow:hidden;margin-top:15px;position:relative}
 .progress-text{position:absolute;width:100%;text-align:center;line-height:22px;font-size:13px;font-weight:bold;color:#fff;text-shadow:1px 1px 3px rgba(0,0,0,0.8);z-index:2;left:0;top:0}
 .bar{height:100%;background:linear-gradient(135deg,#a3e635,#db2777);transition:width 0.3s}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(2,6,23,.72);z-index:1000;align-items:flex-end;justify-content:center;padding:12px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(2,6,23,.72);z-index:1000;align-items:stretch;justify-content:center;padding:6px}
 .modal-overlay.open{display:flex}
-.modal{width:100%;max-width:520px;max-height:92vh;overflow:auto;background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid rgba(255,255,255,.2);border-radius:22px;padding:22px;margin-bottom:8px}
+.modal{width:100%;max-width:520px;max-height:92vh;overflow:auto;background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid rgba(255,255,255,.2);border-radius:22px;padding:22px}
+.modal-sell{max-width:720px;width:min(720px,100%);flex:1;height:auto;max-height:none;overflow:hidden;display:flex;flex-direction:column;padding:14px}
+.sell-form{display:flex;flex-direction:column;flex:1;min-height:0}
 .modal h3{margin:0 0 8px;font-size:20px}
 .modal label{display:block;margin:0 0 6px;color:#f9a8d4;font-size:14px;font-weight:700}
-.suggest-box{position:relative;margin:0 0 16px}
+.suggest-box{position:relative;margin:0 0 12px;flex:0 0 auto}
 .suggest-box input{width:100%;padding:12px;border:0;border-radius:12px;font-size:16px;text-align:center;font-family:inherit}
 .suggest-list{display:none;position:absolute;top:calc(100% + 4px);right:0;left:0;background:#1e293b;border:1px solid rgba(255,255,255,.2);border-radius:12px;max-height:180px;overflow-y:auto;z-index:6;box-shadow:0 12px 24px rgba(0,0,0,.28)}
 .suggest-list.open{display:block}
 .suggest-item{padding:10px 12px;cursor:pointer;font-weight:700}
 .suggest-item:hover{background:rgba(244,114,182,.28)}
 .suggest-hint{font-size:12px;color:#cbd5e1;margin:6px 0 0}
-.sell-list{max-height:42vh;overflow-y:auto;margin:0 0 14px;padding:2px}
-.sell-item{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 12px;margin-bottom:8px}
-.sell-item .pname{flex:1;font-weight:700;text-align:right}
-.sell-item input{width:88px;padding:10px;border:0;border-radius:10px;text-align:center;font-family:inherit;font-size:16px}
-.modal-actions{display:flex;gap:10px}
+.sell-list{flex:1 1 auto;min-height:58vh;max-height:none;overflow-y:auto;margin:0 0 12px;padding:2px;display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:7px;align-content:start}
+.sell-item{display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:8px 10px;margin:0}
+.sell-item .pname{flex:1;font-weight:700;text-align:right;font-size:14px}
+.sell-item input{width:72px;padding:8px;border:0;border-radius:10px;text-align:center;font-family:inherit;font-size:15px}
+.modal-actions{display:flex;gap:10px;flex:0 0 auto}
 .modal-actions button{flex:1;padding:12px;border:0;border-radius:12px;color:white;font-weight:bold;cursor:pointer;font-family:inherit}
 .btn-cancel{background:rgba(255,255,255,.18)}
 .btn-confirm{background:linear-gradient(180deg,#f472b6,#db2777)}
@@ -187,7 +189,16 @@ body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(c
   .nav a{font-size:11px;padding:9px 4px}
   .card{padding:13px}
   .sell-grid{grid-template-columns:1fr}
-  .widget .num{font-size:20px}
+  .widgets{grid-template-columns:repeat(2, minmax(0, 1fr));gap:10px}
+  .widget{min-height:86px;padding:12px 13px;border-radius:20px}
+  .widget h3{font-size:13px}
+  .widget .sub{font-size:11px}
+  .widget .num{font-size:16px;margin-top:6px}
+  .widget .icon{font-size:26px;left:10px;bottom:6px}
+  .modal-sell{padding:12px;border-radius:18px}
+  .sell-list{min-height:62vh}
+  .sell-item .pname{font-size:13px}
+  .sell-item input{width:64px;padding:7px}
 }
 </style>
 </head>
@@ -266,9 +277,9 @@ body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(c
 </div>
 
 <div class="modal-overlay" id="sellModal" onclick="if(event.target===this) closeSellModal()">
-    <div class="modal">
+    <div class="modal modal-sell">
         <h3>تسجيل بيع</h3>
-        <form method="post" id="sellForm" onsubmit="return validateSell()">
+        <form method="post" id="sellForm" class="sell-form" onsubmit="return validateSell()">
             <label for="pharmacyInput">اسم الصيدلية</label>
             <div class="suggest-box">
                 <input type="text" name="pharmacy" id="pharmacyInput" placeholder="اكتب اسم الصيدلية" autocomplete="off" required>
