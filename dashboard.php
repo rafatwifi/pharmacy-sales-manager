@@ -1,16 +1,11 @@
 <?php
-$dataFile = __DIR__ . '/data.json';
-$salesFile = __DIR__ . '/sales.json';
+require_once __DIR__ . '/store.php';
 $uploadPath = 'uploads/products/';
-
-if (!file_exists($dataFile)) file_put_contents($dataFile, '[]');
-if (!file_exists($salesFile)) file_put_contents($salesFile, '[]');
 
 $products = json_decode(file_get_contents($dataFile), true) ?: [];
 $sales = json_decode(file_get_contents($salesFile), true) ?: [];
 $msg = '';
-
-function saveJson($file, $data){ file_put_contents($file, json_encode(array_values($data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX); }
+$period = currentPeriod();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['sell_batch'])) {
@@ -31,7 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'qty' => $sellQty,
                         'price' => (float)$p['price'],
                         'total' => $sellQty * (float)$p['price'],
-                        'date' => date('Y-m-d H:i')
+                        'date' => date('Y-m-d H:i'),
+                        'period' => $period
                     ];
                     $added++;
                 }
@@ -51,8 +47,10 @@ if (isset($_GET['msg'])) {
     $msg = $map[$_GET['msg']] ?? '';
 }
 
+$currentSales = salesInPeriod($sales, $period);
+
 $productReport = [];
-foreach ($sales as $s) {
+foreach ($currentSales as $s) {
     $name = $s['product'];
     if (!isset($productReport[$name])) $productReport[$name] = ['qty' => 0, 'total' => 0];
     $productReport[$name]['qty'] += (int)$s['qty'];
@@ -68,7 +66,7 @@ $pharmacyNames = array_keys($pharmacyNames);
 sort($pharmacyNames, SORT_STRING);
 
 $productPharmacies = [];
-foreach ($sales as $s) {
+foreach ($currentSales as $s) {
     $id = (string)($s['product_id'] ?? '');
     $name = (string)($s['product'] ?? '');
     $ph = trim((string)($s['pharmacy'] ?? ''));
@@ -97,7 +95,7 @@ foreach ($productPharmacies as $key => $rows) {
     $productPharmaciesJs[$key] = $list;
 }
 
-$totalSales = array_sum(array_column($sales, 'total'));
+$totalSales = array_sum(array_column($currentSales, 'total'));
 $totalTarget = 0;
 foreach ($products as $p) {
     $totalTarget += ((int)($p['target_qty'] ?? 0)) * (float)$p['price'];
@@ -220,7 +218,7 @@ body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(c
 
     <div class="widgets">
         <div class="widget c-coral">
-            <div><h3>إجمالي المبيعات</h3><div class="sub">كل المبيعات</div></div>
+            <div><h3>إجمالي المبيعات</h3><div class="sub">الدورة الحالية</div></div>
             <div class="num"><?= number_format($totalSales) ?> د.ع</div>
             <div class="icon">💰</div>
         </div>
@@ -230,16 +228,19 @@ body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(c
             <div class="icon">🎯</div>
         </div>
         <div class="widget c-pink">
-            <div><h3>نسبة التاركت</h3><div class="sub">نسبة الإنجاز</div></div>
+            <div><h3>نسبة التاركت</h3><div class="sub">إنجاز الدورة الحالية</div></div>
             <div class="num"><?= $globalTargetPercent ?>%</div>
             <div class="icon">📈</div>
         </div>
         <div class="widget c-amber">
-            <div><h3>الباقي للتاركت</h3><div class="sub">المتبقي</div></div>
+            <div><h3>الباقي للتاركت</h3><div class="sub">المتبقي لهذه الدورة</div></div>
             <div class="num"><?= number_format($remainingToGlobalTarget) ?> د.ع</div>
             <div class="icon">⏳</div>
         </div>
     </div>
+    <?php if ($period > 1): ?>
+    <p style="color:#f9a8d4;margin:-6px 0 14px;font-size:13px;font-weight:700;">الوجدتس تعرض الدورة الحالية فقط. سجل البيع السابق محفوظ في المبيعات والصيدليات.</p>
+    <?php endif; ?>
 
     <div class="card" id="section-sell">
         <h2>متابعة المنتجات</h2>

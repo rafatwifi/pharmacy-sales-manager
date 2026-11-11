@@ -1,35 +1,33 @@
 <?php
-$dataFile = __DIR__ . '/data.json';
-$salesFile = __DIR__ . '/sales.json';
-
-if (!file_exists($dataFile)) file_put_contents($dataFile, '[]');
-if (!file_exists($salesFile)) file_put_contents($salesFile, '[]');
+require_once __DIR__ . '/store.php';
 
 $sales = json_decode(file_get_contents($salesFile), true) ?: [];
+$period = currentPeriod();
+$currentReport = buildPharmacyReport(salesInPeriod($sales, $period));
+$oldReport = buildPharmacyReport(salesBeforePeriod($sales, $period));
 
-$pharmacyReport = [];
-foreach ($sales as $s) {
-    $pharmacyName = trim((string)($s['pharmacy'] ?? ''));
-    if ($pharmacyName === '') $pharmacyName = 'غير محدد';
-    $productName = $s['product'] ?? '—';
-    if (!isset($pharmacyReport[$pharmacyName])) {
-        $pharmacyReport[$pharmacyName] = ['products' => [], 'qty' => 0, 'total' => 0];
-    }
-    if (!isset($pharmacyReport[$pharmacyName]['products'][$productName])) {
-        $pharmacyReport[$pharmacyName]['products'][$productName] = ['qty' => 0, 'total' => 0];
-    }
-    $qty = (int)$s['qty'];
-    $total = (float)$s['total'];
-    $pharmacyReport[$pharmacyName]['products'][$productName]['qty'] += $qty;
-    $pharmacyReport[$pharmacyName]['products'][$productName]['total'] += $total;
-    $pharmacyReport[$pharmacyName]['qty'] += $qty;
-    $pharmacyReport[$pharmacyName]['total'] += $total;
-}
-uasort($pharmacyReport, function ($a, $b) {
-    $cmp = ($b['total'] <=> $a['total']);
-    if ($cmp !== 0) return $cmp;
-    return ($b['qty'] <=> $a['qty']);
+$pharmacyNames = array_unique(array_merge(array_keys($currentReport), array_keys($oldReport)));
+usort($pharmacyNames, function ($a, $b) use ($currentReport, $oldReport) {
+    $aNow = $currentReport[$a]['total'] ?? 0;
+    $bNow = $currentReport[$b]['total'] ?? 0;
+    if ($aNow !== $bNow) return $bNow <=> $aNow;
+    $aOld = $oldReport[$a]['total'] ?? 0;
+    $bOld = $oldReport[$b]['total'] ?? 0;
+    return $bOld <=> $aOld;
 });
+
+function renderPharmacyProducts($info) {
+    if (empty($info) || empty($info['products'])) {
+        echo '<p style="color:#cbd5e1;margin:0;font-size:13px;">لا توجد مبيعات في هذا القسم.</p>';
+        return;
+    }
+    echo '<div class="pharmacy-meta"><span>الكمية: ' . number_format($info['qty']) . ' قطعة</span><span>الإجمالي: ' . number_format($info['total']) . ' د.ع</span></div>';
+    echo '<div class="table-wrap report-wrap"><table class="report-table"><tr><th>المنتج</th><th>الكمية</th><th>القيمة</th></tr>';
+    foreach ($info['products'] as $productName => $pr) {
+        echo '<tr><td>' . htmlspecialchars($productName) . '</td><td>' . number_format($pr['qty']) . ' قطعة</td><td>' . number_format($pr['total']) . ' د.ع</td></tr>';
+    }
+    echo '</table></div>';
+}
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -71,6 +69,10 @@ tr td:last-child{border-radius:14px 0 0 14px}
 .pharmacy-block{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:18px;padding:14px}
 .pharmacy-block h3{margin:0 0 10px;color:#fcd34d;font-size:18px}
 .pharmacy-meta{display:flex;justify-content:space-between;gap:8px;margin-bottom:10px;color:#f9a8d4;font-size:13px;font-weight:bold}
+.period-box{margin-top:12px;padding:10px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05)}
+.period-box h4{margin:0 0 8px;font-size:14px}
+.period-new h4{color:#a3e635}
+.period-old h4{color:#f9a8d4}
 .back-top{position:fixed;left:18px;bottom:22px;z-index:900;width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);color:#fff;font-size:24px;font-weight:bold;display:none;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 10px 24px rgba(0,0,0,.18)}
 .back-top.show{display:flex}
 @media(max-width:600px){.container{padding:10px}.logo{font-size:21px}.nav a{font-size:11px;padding:9px 4px}.card{padding:13px}.report-table th,.report-table td{font-size:12px;padding:10px 4px}}
@@ -90,29 +92,21 @@ tr td:last-child{border-radius:14px 0 0 14px}
 
     <div class="card">
         <h2>الصيدليات</h2>
-        <p style="color:#f9a8d4;margin:0 0 12px;font-size:14px;font-weight:700;">مرتبة من الأعلى مبيعاتاً إلى الأقل.</p>
-        <?php if (empty($pharmacyReport)): ?>
+        <p style="color:#f9a8d4;margin:0 0 12px;font-size:14px;font-weight:700;">كل صيدلية تعرض المبيعات الحالية بعد التصفير، والمبيعات السابقة منفصلة.</p>
+        <?php if (empty($pharmacyNames)): ?>
             <p style="color:#f9a8d4;margin:0;">لا توجد مبيعات بعد.</p>
         <?php else: ?>
         <div class="pharmacy-grid">
-            <?php foreach ($pharmacyReport as $pharmacyName => $info): ?>
+            <?php foreach ($pharmacyNames as $pharmacyName): ?>
             <div class="pharmacy-block">
                 <h3><?= htmlspecialchars($pharmacyName) ?></h3>
-                <div class="pharmacy-meta">
-                    <span>الكمية: <?= number_format($info['qty']) ?> قطعة</span>
-                    <span>الإجمالي: <?= number_format($info['total']) ?> د.ع</span>
+                <div class="period-box period-new">
+                    <h4>المبيعات الحالية</h4>
+                    <?php renderPharmacyProducts($currentReport[$pharmacyName] ?? []); ?>
                 </div>
-                <div class="table-wrap report-wrap">
-                    <table class="report-table">
-                        <tr><th>المنتج</th><th>الكمية</th><th>القيمة</th></tr>
-                        <?php foreach ($info['products'] as $productName => $pr): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($productName) ?></td>
-                            <td><?= number_format($pr['qty']) ?> قطعة</td>
-                            <td><?= number_format($pr['total']) ?> د.ع</td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </table>
+                <div class="period-box period-old">
+                    <h4>المبيعات السابقة</h4>
+                    <?php renderPharmacyProducts($oldReport[$pharmacyName] ?? []); ?>
                 </div>
             </div>
             <?php endforeach; ?>

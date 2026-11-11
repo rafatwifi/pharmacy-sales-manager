@@ -1,15 +1,10 @@
 <?php
-$dataFile = __DIR__ . '/data.json';
-$salesFile = __DIR__ . '/sales.json';
-
-if (!file_exists($dataFile)) file_put_contents($dataFile, '[]');
-if (!file_exists($salesFile)) file_put_contents($salesFile, '[]');
+require_once __DIR__ . '/store.php';
 
 $products = json_decode(file_get_contents($dataFile), true) ?: [];
 $sales = json_decode(file_get_contents($salesFile), true) ?: [];
 $msg = '';
-
-function saveJson($file, $data){ file_put_contents($file, json_encode(array_values($data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX); }
+$period = currentPeriod();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['update_sale'])) {
@@ -36,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     if (isset($_POST['reset_sales'])) {
-        file_put_contents($salesFile, '[]');
+        startNewCycle();
         header('Location: reports.php?msg=reset');
         exit;
     }
@@ -44,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 if (isset($_GET['msg'])) {
     $map = [
-        'reset' => 'تم تصفير المبيعات ✅',
+        'reset' => 'تم تصفير الداشبورد وبدء دورة جديدة. سجل البيع السابق محفوظ ✅',
         'updated_sale' => 'تم تعديل عملية البيع بنجاح ✅',
         'deleted_sale' => 'تم حذف عملية البيع بنجاح ✅'
     ];
@@ -126,6 +121,7 @@ tr td:last-child{border-radius:14px 0 0 14px}
 
     <div class="card" id="section-report">
         <h2>تقرير المبيعات حسب المنتج</h2>
+        <p style="color:#f9a8d4;margin:0 0 12px;font-size:14px;font-weight:700;">السجل الكامل — لا يُحذف عند تصفير الداشبورد.</p>
         <div class="table-wrap report-wrap">
             <table class="report-table">
                 <tr><th>المنتج</th><th>إجمالي القطع المباعة</th><th>إجمالي البيع</th></tr>
@@ -141,7 +137,7 @@ tr td:last-child{border-radius:14px 0 0 14px}
     </div>
 
     <div class="card" id="section-sales">
-        <h2>آخر عمليات البيع</h2>
+        <h2>سجل عمليات البيع</h2>
         <div class="table-wrap sales-wrap">
             <table class="sales-table">
                 <tr>
@@ -151,6 +147,7 @@ tr td:last-child{border-radius:14px 0 0 14px}
                     <th>سعر القطعة</th>
                     <th>الإجمالي</th>
                     <th>التاريخ</th>
+                    <th>الدورة</th>
                     <th>تعديل</th>
                     <th>حذف</th>
                 </tr>
@@ -162,6 +159,7 @@ tr td:last-child{border-radius:14px 0 0 14px}
                     <td><?= number_format($s['price']) ?> د.ع</td>
                     <td><?= number_format($s['total']) ?> د.ع</td>
                     <td><?= $s['date'] ?></td>
+                    <td><?= salePeriod($s) === $period ? 'حالية' : 'سابقة' ?></td>
                     <td>
                         <form method="post" class="edit-form">
                             <input type="hidden" name="sale_index" value="<?= $index ?>">
@@ -183,8 +181,8 @@ tr td:last-child{border-radius:14px 0 0 14px}
     </div>
 
     <div class="card">
-        <form method="post" onsubmit="return confirm('متأكد؟ سيتم تصفير المبيعات.');">
-            <button class="btn-reset" name="reset_sales">تصفير كافة المبيعات</button>
+        <form method="post" onsubmit="return confirm('راح يتصفر الداشبورد وتبدأ دورة مبيعات جديدة. عمليات البيع السابقة تبقى في السجل والصيدليات.');">
+            <button class="btn-reset" name="reset_sales">تصفير الداشبورد (بدون حذف السجل)</button>
         </form>
     </div>
 </div>
