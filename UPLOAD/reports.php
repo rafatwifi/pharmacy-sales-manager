@@ -31,27 +31,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     if (isset($_POST['reset_sales'])) {
-        startNewCycle();
-        header('Location: reports.php?msg=reset');
+        $ok = startNewCycle();
+        header('Location: reports.php?msg=' . ($ok ? 'reset' : 'reset_fail'));
         exit;
     }
 }
 
 if (isset($_GET['msg'])) {
     $map = [
-        'reset' => 'تم تصفير الداشبورد وبدء دورة جديدة. سجل البيع السابق محفوظ ✅',
+        'reset' => 'تم تصفير تقرير المنتجات والداشبورد. سجل البيع السابق محفوظ ✅',
+        'reset_fail' => 'ما تكدر يتصفر. تأكد صلاحية الكتابة لملف sales.json ❌',
         'updated_sale' => 'تم تعديل عملية البيع بنجاح ✅',
         'deleted_sale' => 'تم حذف عملية البيع بنجاح ✅'
     ];
     $msg = $map[$_GET['msg']] ?? '';
 }
 
-$productReport = [];
-foreach ($sales as $s) {
-    $name = $s['product'];
-    if (!isset($productReport[$name])) $productReport[$name] = ['qty' => 0, 'total' => 0];
-    $productReport[$name]['qty'] += (int)$s['qty'];
-    $productReport[$name]['total'] += (float)$s['total'];
+function buildProductReport($rows) {
+    $report = [];
+    foreach ($rows as $s) {
+        $name = $s['product'] ?? '—';
+        if (!isset($report[$name])) $report[$name] = ['qty' => 0, 'total' => 0];
+        $report[$name]['qty'] += (int)$s['qty'];
+        $report[$name]['total'] += (float)$s['total'];
+    }
+    return $report;
+}
+
+$currentSales = salesInPeriod($sales, $period);
+$oldSales = salesBeforePeriod($sales, $period);
+$currentReport = buildProductReport($currentSales);
+$oldReport = buildProductReport($oldSales);
+
+foreach ($products as $p) {
+    $name = $p['name'] ?? '';
+    if ($name !== '' && !isset($currentReport[$name])) {
+        $currentReport[$name] = ['qty' => 0, 'total' => 0];
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -78,6 +94,7 @@ body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(c
 .btn-nav-sales.active{background:linear-gradient(180deg,rgba(196,181,253,.55),rgba(139,92,246,.34))}
 .btn-nav-pharmacies.active{background:linear-gradient(180deg,rgba(249,168,212,.55),rgba(236,72,153,.34))}
 .msg{background:#22c55e;padding:14px;border-radius:16px;margin-bottom:18px;font-weight:bold}
+.msg.err{background:#e11d48}
 .card{background:rgba(255,255,255,.12);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.18);border-radius:24px;padding:18px;margin-bottom:22px;scroll-margin-top:88px}
 .table-wrap{width:100%;padding-bottom:8px}
 table{width:100%;border-collapse:separate;border-spacing:0 10px}
@@ -117,15 +134,16 @@ tr td:last-child{border-radius:14px 0 0 14px}
         </div>
     </div>
 
-    <?php if($msg): ?><div class="msg"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
+    <?php if($msg): ?><div class="msg<?= strpos($msg, '❌') !== false ? ' err' : '' ?>"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
 
     <div class="card" id="section-report">
         <h2>تقرير المبيعات حسب المنتج</h2>
-        <p style="color:#f9a8d4;margin:0 0 12px;font-size:14px;font-weight:700;">السجل الكامل — لا يُحذف عند تصفير الداشبورد.</p>
+        <p style="color:#f9a8d4;margin:0 0 12px;font-size:14px;font-weight:700;">هذا الجدول للدورة الحالية ويتصفر مع زر التصفير. السجل التفصيلي يبقى تحت.</p>
+        <h3 style="margin:0 0 10px;color:#a3e635;font-size:16px;">المبيعات الحالية</h3>
         <div class="table-wrap report-wrap">
             <table class="report-table">
                 <tr><th>المنتج</th><th>إجمالي القطع المباعة</th><th>إجمالي البيع</th></tr>
-                <?php foreach($productReport as $name=>$r): ?>
+                <?php foreach($currentReport as $name=>$r): ?>
                 <tr>
                     <td><?= htmlspecialchars($name) ?></td>
                     <td><?= number_format($r['qty']) ?> قطعة</td>
@@ -134,6 +152,21 @@ tr td:last-child{border-radius:14px 0 0 14px}
                 <?php endforeach; ?>
             </table>
         </div>
+        <?php if (!empty($oldReport)): ?>
+        <h3 style="margin:18px 0 10px;color:#f9a8d4;font-size:16px;">المبيعات السابقة</h3>
+        <div class="table-wrap report-wrap">
+            <table class="report-table">
+                <tr><th>المنتج</th><th>إجمالي القطع المباعة</th><th>إجمالي البيع</th></tr>
+                <?php foreach($oldReport as $name=>$r): ?>
+                <tr>
+                    <td><?= htmlspecialchars($name) ?></td>
+                    <td><?= number_format($r['qty']) ?> قطعة</td>
+                    <td><?= number_format($r['total']) ?> د.ع</td>
+                </tr>
+                <?php endforeach; ?>
+            </table>
+        </div>
+        <?php endif; ?>
     </div>
 
     <div class="card" id="section-sales">
@@ -159,7 +192,7 @@ tr td:last-child{border-radius:14px 0 0 14px}
                     <td><?= number_format($s['price']) ?> د.ع</td>
                     <td><?= number_format($s['total']) ?> د.ع</td>
                     <td><?= $s['date'] ?></td>
-                    <td><?= salePeriod($s) === $period ? 'حالية' : 'سابقة' ?></td>
+                    <td><?= isCurrentSale($s, $period) ? 'حالية' : 'سابقة' ?></td>
                     <td>
                         <form method="post" class="edit-form">
                             <input type="hidden" name="sale_index" value="<?= $index ?>">
@@ -182,7 +215,8 @@ tr td:last-child{border-radius:14px 0 0 14px}
 
     <div class="card">
         <form method="post" onsubmit="return confirm('راح يتصفر الداشبورد وتبدأ دورة مبيعات جديدة. عمليات البيع السابقة تبقى في السجل والصيدليات.');">
-            <button class="btn-reset" name="reset_sales">تصفير الداشبورد (بدون حذف السجل)</button>
+            <input type="hidden" name="reset_sales" value="1">
+            <button class="btn-reset" type="submit">تصفير الداشبورد (بدون حذف السجل)</button>
         </form>
     </div>
 </div>

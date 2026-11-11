@@ -27,7 +27,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'price' => (float)$p['price'],
                         'total' => $sellQty * (float)$p['price'],
                         'date' => date('Y-m-d H:i'),
-                        'period' => $period
+                        'period' => $period,
+                        'closed' => 0
                     ];
                     $added++;
                 }
@@ -238,9 +239,7 @@ body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(c
             <div class="icon">⏳</div>
         </div>
     </div>
-    <?php if ($period > 1): ?>
-    <p style="color:#f9a8d4;margin:-6px 0 14px;font-size:13px;font-weight:700;">الوجدتس تعرض الدورة الحالية فقط. سجل البيع السابق محفوظ في المبيعات والصيدليات.</p>
-    <?php endif; ?>
+    <p style="color:#f9a8d4;margin:-6px 0 14px;font-size:13px;font-weight:700;">الوجدتس تعرض الدورة الحالية فقط (دورة <?= (int)$period ?>). سجل البيع السابق محفوظ في المبيعات والصيدليات.</p>
 
     <div class="card" id="section-sell">
         <h2>متابعة المنتجات</h2>
