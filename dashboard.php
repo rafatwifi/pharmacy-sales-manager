@@ -126,15 +126,15 @@ body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(c
 .header{position:sticky;top:0;z-index:850;display:flex;flex-direction:column;align-items:stretch;gap:10px;margin:0 0 16px;padding:10px 0 12px;background:linear-gradient(180deg,rgba(2,6,23,.96),rgba(2,6,23,.84) 78%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 .logo{font-size:26px;font-weight:bold}
 <?= app_nav_styles() ?>
-.nav{display:flex;flex-wrap:nowrap;gap:4px;width:100%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:18px;padding:5px}
-.nav a{flex:1 1 0;min-width:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#e2e8f0;text-decoration:none;padding:11px 8px;border-radius:14px;font-weight:800;font-size:14px;border:0;background:transparent}
+.nav{display:flex;flex-wrap:nowrap;gap:4px;width:100%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:28px;padding:6px}
+.nav a{flex:1 1 0;min-width:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#e2e8f0;text-decoration:none;padding:11px 8px;border-radius:22px;font-weight:800;font-size:14px;border:0;background:transparent}
 .nav a:hover{background:rgba(255,255,255,.08);color:#fff}
 .nav a.active{background:rgba(255,255,255,.22);color:#fff;box-shadow:0 8px 18px rgba(0,0,0,.18)}
 .btn-nav-dash.active{background:linear-gradient(180deg,rgba(255,200,160,.55),rgba(251,146,60,.38))}
 .btn-nav-products.active{background:linear-gradient(180deg,rgba(190,242,100,.50),rgba(132,204,22,.32))}
 .btn-nav-sales.active{background:linear-gradient(180deg,rgba(196,181,253,.55),rgba(139,92,246,.34))}
 .btn-nav-pharmacies.active{background:linear-gradient(180deg,rgba(249,168,212,.55),rgba(236,72,153,.34))}
-.search{width:100%;padding:14px;border:0;border-radius:16px;margin:0 0 18px;font-size:16px;outline:none;font-family:inherit}
+.search{width:100%;padding:14px;border:0;border-radius:999px;margin:0 0 18px;font-size:16px;outline:none;font-family:inherit}
 .widgets{display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:14px;margin-bottom:14px}
 .widget{position:relative;overflow:hidden;border-radius:28px;color:#f8fafc;min-height:110px;padding:16px 18px;display:flex;flex-direction:column;justify-content:space-between;border:1px solid rgba(255,255,255,.34);backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);box-shadow:0 12px 30px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.45)}
 .widget::before{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle at 20% 15%,rgba(255,255,255,.42),transparent 42%),radial-gradient(circle at 85% 80%,rgba(255,255,255,.12),transparent 40%);pointer-events:none}

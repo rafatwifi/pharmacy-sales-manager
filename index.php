@@ -17,6 +17,7 @@ $map = array(
     'paused' => 'pages/paused.php',
     'expired' => 'pages/expired.php',
     'admin' => 'pages/admin.php',
+    'profile' => 'pages/profile.php',
     'dashboard' => 'dashboard.php',
     'products' => 'products.php',
     'sales' => 'reports.php',

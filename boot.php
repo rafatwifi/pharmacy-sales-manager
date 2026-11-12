@@ -163,23 +163,81 @@ function license_guard() {
 }
 
 function app_nav_styles() {
-    return '.userbar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 8px}'
-        . '.userchip{display:flex;align-items:center;gap:8px;flex-wrap:wrap}'
-        . '.userchip b{font-size:13px}'
-        . '.userchip a,.userchip button{color:#fff;text-decoration:none;border:0;background:rgba(255,255,255,.14);border-radius:12px;padding:8px 12px;font-weight:800;font-family:inherit;font-size:12px;cursor:pointer}'
-        . '.userchip a.admin{background:linear-gradient(180deg,rgba(250,204,21,.55),rgba(245,158,11,.35))}'
-        . '.userchip a.out{background:rgba(225,29,72,.55)}';
+    return '.header{border-radius:0 0 32px 32px}'
+        . '.userbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 10px}'
+        . '.nav{border-radius:28px !important}'
+        . '.nav a{border-radius:22px !important}'
+        . '.search{border-radius:999px !important}'
+        . '.card,.widget,.sell-card,.pharmacy-block{border-radius:28px !important}'
+        . '.prof{position:relative;z-index:960}'
+        . '.prof-btn{width:48px;height:48px;border:0;padding:0;border-radius:50%;overflow:hidden;cursor:pointer;background:linear-gradient(135deg,#38bdf8,#8b5cf6);box-shadow:0 8px 20px rgba(15,23,42,.28);display:grid;place-items:center}'
+        . '.prof-btn img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}'
+        . '.prof-btn span{color:#fff;font-weight:800;font-size:18px}'
+        . '.prof-panel{display:none;position:absolute;top:calc(100% + 10px);left:0;width:min(340px,calc(100vw - 24px));background:linear-gradient(180deg,#111827,#0b1220);border:1px solid rgba(255,255,255,.12);border-radius:28px;padding:16px;box-shadow:0 24px 50px rgba(0,0,0,.4);z-index:970}'
+        . '.prof.open .prof-panel{display:block}'
+        . '.prof-head{display:flex;align-items:center;gap:12px;margin:0 0 14px}'
+        . '.prof-photo{position:relative;width:72px;height:72px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#38bdf8,#8b5cf6);flex:0 0 auto}'
+        . '.prof-photo img,.prof-photo .ph{width:100%;height:100%;object-fit:cover;display:grid;place-items:center;font-size:28px;font-weight:800}'
+        . '.prof-photo label{position:absolute;inset:auto 0 0 0;background:rgba(2,6,23,.72);color:#fff;font-size:11px;font-weight:800;text-align:center;padding:4px 0;cursor:pointer}'
+        . '.prof-head b{display:block;font-size:16px}'
+        . '.prof-head small{color:#94a3b8;font-weight:700}'
+        . '.prof-panel input{width:100%;padding:11px 12px;border:0;border-radius:16px;margin:0 0 8px;font-family:inherit;text-align:center}'
+        . '.prof-panel label.lbl{display:block;color:#cbd5e1;font-size:12px;font-weight:800;margin:0 0 4px}'
+        . '.prof-panel button,.prof-out{width:100%;border:0;border-radius:16px;padding:11px;font-weight:800;font-family:inherit;cursor:pointer;color:#fff}'
+        . '.prof-save{background:linear-gradient(180deg,#38bdf8,#2563eb);margin:0 0 10px}'
+        . '.prof-out{display:block;text-align:center;text-decoration:none;background:linear-gradient(180deg,#fb7185,#e11d48);margin-top:6px}'
+        . '.flashbar{background:rgba(16,185,129,.18);color:#bbf7d0;border-radius:18px;padding:10px 12px;margin:0 0 12px;font-weight:800;text-align:center}';
 }
 
 function app_nav($active) {
     $user = current_user();
     $name = $user ? $user['name'] : '';
+    $phone = ($user && !empty($user['phone'])) ? $user['phone'] : '';
     $isAdmin = is_admin_user($user);
-    echo '<div class="userbar"><div class="logo">💊 Medical Sales</div><div class="userchip">';
-    echo '<b>' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '</b>';
-    if ($isAdmin) echo '<a class="admin" href="' . htmlspecialchars(url('admin'), ENT_QUOTES, 'UTF-8') . '">لوحة المدير</a>';
-    echo '<a class="out" href="' . htmlspecialchars(url('logout'), ENT_QUOTES, 'UTF-8') . '">خروج</a>';
-    echo '</div></div>';
+    $avatar = user_avatar_url($user);
+    $initial = htmlspecialchars(user_initial($user), ENT_QUOTES, 'UTF-8');
+    $flash = take_flash();
+    echo '<div class="userbar"><div class="logo">💊 Medical Sales</div>';
+    echo '<div class="prof" id="profBox">';
+    echo '<button type="button" class="prof-btn" id="profBtn" title="الملف الشخصي">';
+    if ($avatar !== '') {
+        echo '<img src="' . htmlspecialchars($avatar, ENT_QUOTES, 'UTF-8') . '" alt="">';
+    } else {
+        echo '<span>' . $initial . '</span>';
+    }
+    echo '</button>';
+    echo '<div class="prof-panel">';
+    echo '<div class="prof-head">';
+    echo '<form method="post" action="' . htmlspecialchars(url('profile'), ENT_QUOTES, 'UTF-8') . '" enctype="multipart/form-data" class="prof-photo">';
+    echo csrf_field();
+    echo '<input type="hidden" name="action" value="photo">';
+    echo '<input type="hidden" name="back" value="' . htmlspecialchars($active, ENT_QUOTES, 'UTF-8') . '">';
+    if ($avatar !== '') echo '<img src="' . htmlspecialchars($avatar, ENT_QUOTES, 'UTF-8') . '" alt="">';
+    else echo '<div class="ph">' . $initial . '</div>';
+    echo '<label>تغيير الصورة<input type="file" name="avatar" accept="image/*" onchange="this.form.submit()" style="display:none"></label>';
+    echo '</form>';
+    echo '<div><b>' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '</b><small>@' . htmlspecialchars($user ? $user['username'] : '', ENT_QUOTES, 'UTF-8') . '</small></div>';
+    echo '</div>';
+    if ($isAdmin) echo '<a class="prof-save" style="display:block;text-align:center;text-decoration:none;margin-bottom:10px;background:linear-gradient(180deg,#fbbf24,#d97706)" href="' . htmlspecialchars(url('admin'), ENT_QUOTES, 'UTF-8') . '">لوحة المدير</a>';
+    echo '<form method="post" action="' . htmlspecialchars(url('profile'), ENT_QUOTES, 'UTF-8') . '">';
+    echo csrf_field();
+    echo '<input type="hidden" name="action" value="info">';
+    echo '<input type="hidden" name="back" value="' . htmlspecialchars($active, ENT_QUOTES, 'UTF-8') . '">';
+    echo '<label class="lbl">الاسم</label><input name="name" value="' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '" required>';
+    echo '<label class="lbl">الهاتف</label><input name="phone" value="' . htmlspecialchars($phone, ENT_QUOTES, 'UTF-8') . '" placeholder="رقم الهاتف">';
+    echo '<button class="prof-save" type="submit">حفظ المعلومات</button>';
+    echo '</form>';
+    echo '<form method="post" action="' . htmlspecialchars(url('profile'), ENT_QUOTES, 'UTF-8') . '">';
+    echo csrf_field();
+    echo '<input type="hidden" name="action" value="pass">';
+    echo '<input type="hidden" name="back" value="' . htmlspecialchars($active, ENT_QUOTES, 'UTF-8') . '">';
+    echo '<label class="lbl">كلمة مرور جديدة</label><input type="password" name="new_pass" required>';
+    echo '<label class="lbl">تأكيد كلمة المرور</label><input type="password" name="new_pass2" required>';
+    echo '<button class="prof-save" type="submit">تعديل كلمة المرور</button>';
+    echo '</form>';
+    echo '<a class="prof-out" href="' . htmlspecialchars(url('logout'), ENT_QUOTES, 'UTF-8') . '">تسجيل خروج</a>';
+    echo '</div></div></div>';
+    if ($flash !== '') echo '<div class="flashbar">' . htmlspecialchars($flash, ENT_QUOTES, 'UTF-8') . '</div>';
     echo '<div class="nav">';
     $links = array(
         'dashboard' => array('الداشبورد', 'btn-nav-dash'),
@@ -192,4 +250,5 @@ function app_nav($active) {
         echo '<a class="' . $cls . '" href="' . htmlspecialchars(url($key), ENT_QUOTES, 'UTF-8') . '">' . $info[0] . '</a>';
     }
     echo '</div>';
+    echo '<script>(function(){var b=document.getElementById("profBox");var t=document.getElementById("profBtn");if(!b||!t)return;t.addEventListener("click",function(e){e.stopPropagation();b.classList.toggle("open");});document.addEventListener("click",function(e){if(!b.contains(e.target))b.classList.remove("open");});})();</script>';
 }

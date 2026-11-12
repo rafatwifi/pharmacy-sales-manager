@@ -82,6 +82,35 @@ function current_user() {
     return find_user_by('id', $_SESSION['uid']);
 }
 
+function set_flash($text) { $_SESSION['flash'] = $text; }
+function take_flash() {
+    if (empty($_SESSION['flash'])) return '';
+    $t = $_SESSION['flash'];
+    unset($_SESSION['flash']);
+    return $t;
+}
+
+function user_avatar_dir($userId) {
+    $id = preg_replace('/[^a-zA-Z0-9_-]/', '', $userId);
+    $dir = APP_ROOT . '/uploads/' . $id;
+    if (!is_dir($dir)) @mkdir($dir, 0755, true);
+    return $dir;
+}
+
+function user_avatar_url($user) {
+    if (!$user || empty($user['avatar'])) return '';
+    $fs = user_avatar_dir($user['id']) . '/' . $user['avatar'];
+    if (!file_exists($fs)) return '';
+    $base = app_base();
+    return ($base === '' ? '' : $base) . '/uploads/' . rawurlencode($user['id']) . '/' . rawurlencode($user['avatar']) . '?t=' . filemtime($fs);
+}
+
+function user_initial($user) {
+    $name = ($user && !empty($user['name'])) ? $user['name'] : 'م';
+    if (function_exists('mb_substr')) return mb_substr($name, 0, 1, 'UTF-8');
+    return substr($name, 0, 1);
+}
+
 function is_admin_user($user) {
     return $user && !empty($user['role']) && $user['role'] === 'admin';
 }
