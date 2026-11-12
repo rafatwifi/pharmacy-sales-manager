@@ -59,7 +59,7 @@ body{margin:0;min-height:100vh;font-family:'Cairo',Tahoma,sans-serif;color:#fff;
 .wrap{position:relative;z-index:2;min-height:100vh;display:flex;align-items:safe center;justify-content:safe center;padding:18px}
 .card{width:100%;max-width:430px;background:rgba(15,23,42,.72);border:1px solid rgba(255,255,255,.18);border-radius:28px;padding:22px 22px 22px;backdrop-filter:blur(18px);box-shadow:0 24px 60px rgba(0,0,0,.35)}
 .brand{display:flex;justify-content:center;margin:0 0 8px}
-.brand img{width:150px;height:150px;border-radius:50%;object-fit:contain;display:block;background:transparent;filter:drop-shadow(0 10px 18px rgba(14,165,233,.35))}
+.brand img{width:176px;height:176px;object-fit:contain;display:block;background:transparent;filter:drop-shadow(0 10px 18px rgba(14,165,233,.28))}
 .face{width:126px;height:126px;margin:0 auto 8px;border-radius:50%;background:linear-gradient(180deg,#fde68a,#f59e0b);position:relative;box-shadow:0 12px 30px rgba(245,158,11,.35);animation:bob 3.4s ease-in-out infinite}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 .eye{position:absolute;top:46px;width:16px;height:16px;background:#0f172a;border-radius:50%;animation:blink 4.2s infinite}
