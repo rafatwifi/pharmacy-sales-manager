@@ -33,17 +33,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 $qerr = isset($_GET['err']) ? $_GET['err'] : '';
 if ($qerr === 'rejected') $err = 'تم رفض طلب العضوية';
+$settings = load_settings();
+$siteName = !empty($settings['site_name']) ? $settings['site_name'] : 'Medical Sales';
+$logo = site_logo_url();
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>دخول المندوبين</title>
+<title>دخول <?= htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') ?></title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;font-family:'Cairo',Tahoma,sans-serif;color:#fff;overflow:hidden;background:#020617}
+body{margin:0;min-height:100vh;font-family:'Cairo',Tahoma,sans-serif;color:#fff;overflow-x:hidden;background:#020617}
 .bg{position:fixed;inset:0;background:radial-gradient(circle at 20% 20%,#0ea5e9 0%,transparent 32%),radial-gradient(circle at 80% 0%,#db2777 0%,transparent 30%),radial-gradient(circle at 70% 90%,#22c55e 0%,transparent 28%),linear-gradient(180deg,#020617,#0f172a)}
 .orb{position:absolute;border-radius:50%;filter:blur(8px);opacity:.35;animation:float 8s ease-in-out infinite}
 .o1{width:180px;height:180px;background:#38bdf8;top:12%;right:8%;animation-delay:0s}
@@ -53,8 +56,10 @@ body{margin:0;min-height:100vh;font-family:'Cairo',Tahoma,sans-serif;color:#fff;
 .bits{position:fixed;inset:0;pointer-events:none}
 .bit{position:absolute;font-size:22px;animation:rise 7s linear infinite;opacity:.0}
 @keyframes rise{0%{transform:translateY(20px) scale(.7);opacity:0}15%{opacity:.85}100%{transform:translateY(-110vh) scale(1.2);opacity:0}}
-.wrap{position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px}
-.card{width:100%;max-width:430px;background:rgba(15,23,42,.72);border:1px solid rgba(255,255,255,.18);border-radius:28px;padding:28px 22px 22px;backdrop-filter:blur(18px);box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.wrap{position:relative;z-index:2;min-height:100vh;display:flex;align-items:safe center;justify-content:safe center;padding:18px}
+.card{width:100%;max-width:430px;background:rgba(15,23,42,.72);border:1px solid rgba(255,255,255,.18);border-radius:28px;padding:22px 22px 22px;backdrop-filter:blur(18px);box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.brand{display:flex;justify-content:center;margin:0 0 8px}
+.brand img{width:150px;height:150px;border-radius:50%;object-fit:contain;display:block;background:transparent;filter:drop-shadow(0 10px 18px rgba(14,165,233,.35))}
 .face{width:126px;height:126px;margin:0 auto 8px;border-radius:50%;background:linear-gradient(180deg,#fde68a,#f59e0b);position:relative;box-shadow:0 12px 30px rgba(245,158,11,.35);animation:bob 3.4s ease-in-out infinite}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 .eye{position:absolute;top:46px;width:16px;height:16px;background:#0f172a;border-radius:50%;animation:blink 4.2s infinite}
@@ -81,9 +86,14 @@ input{width:100%;padding:14px;border:0;border-radius:14px;margin:0 0 12px;font-f
 <div class="bits" id="bits"></div>
 <div class="wrap">
   <form class="card" method="post" id="box">
+    <?php if ($logo !== ''): ?>
+    <div class="brand">
+      <img src="<?= htmlspecialchars($logo, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') ?>">
+    </div>
+    <?php endif; ?>
     <div class="face" id="face"><span class="eye e1"></span><span class="eye e2"></span><span class="blush b1"></span><span class="blush b2"></span><span class="mouth"></span></div>
     <h1>مرحباً بك</h1>
-    <p class="sub">نظام المندوبين الطبي — دخول آمن</p>
+    <p class="sub"><?= $logo !== '' ? 'دخول آمن' : htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') . ' — دخول آمن' ?></p>
     <div class="live" id="live">😊 جاهز لاستقبالك...</div>
     <?php if ($err): ?><div class="err"><?= htmlspecialchars($err, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
     <?= csrf_field() ?>

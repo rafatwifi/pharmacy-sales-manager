@@ -464,7 +464,7 @@ a{color:inherit}
     <?php elseif ($tab === 'site'): ?>
     <div class="panel">
       <h2>إعدادات الموقع</h2>
-      <p style="color:var(--muted);font-weight:700">الاسم والصورة والنبذة تظهر للمندوب في صفحة «عن الموقع».</p>
+      <p style="color:var(--muted);font-weight:700">الاسم والصورة يظهران في صفحة الدخول، والنبذة في صفحة «عن الموقع».</p>
       <?php $logoNow = site_logo_url(); if ($logoNow !== ''): ?>
       <img src="<?= htmlspecialchars($logoNow, ENT_QUOTES, 'UTF-8') ?>" alt="" style="width:96px;height:96px;border-radius:50%;object-fit:cover;margin:0 0 14px">
       <?php endif; ?>
