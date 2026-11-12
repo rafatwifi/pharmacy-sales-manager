@@ -9,4 +9,5 @@ storage/app.key
 storage/users.json
 storage/packages.json
 storage/lock.json
+storage/settings.json
 storage/tenants/

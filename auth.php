@@ -17,6 +17,29 @@ function load_users() { return load_json_file(users_file(), array()); }
 function save_users($users) { return saveJson(users_file(), array_values($users)); }
 function load_packages() { return load_json_file(packages_file(), array()); }
 function save_packages($rows) { return saveJson(packages_file(), array_values($rows)); }
+function settings_file() { return STORAGE_PATH . '/settings.json'; }
+function load_settings() {
+    $defaults = array(
+        'zaincash_enabled' => 1,
+        'zaincash_number' => '',
+        'zaincash_name' => '',
+        'zaincash_note' => 'حوّل مبلغ الباقة عبر زين كاش ثم أخبر الإدارة لتفعيل الاشتراك.'
+    );
+    $data = load_json_file(settings_file(), array());
+    if (!is_array($data)) $data = array();
+    return array_merge($defaults, $data);
+}
+function save_settings($data) { return saveJson(settings_file(), $data); }
+function delete_user_account($id) {
+    $user = find_user_by('id', $id);
+    if (!$user || is_admin_user($user)) return false;
+    $users = load_users();
+    $out = array();
+    foreach ($users as $u) {
+        if ((string)$u['id'] !== (string)$id) $out[] = $u;
+    }
+    return save_users($out);
+}
 
 function find_user_by($field, $value) {
     $users = load_users();
