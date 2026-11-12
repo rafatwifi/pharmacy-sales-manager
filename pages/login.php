@@ -60,17 +60,6 @@ body{margin:0;min-height:100vh;font-family:'Cairo',Tahoma,sans-serif;color:#fff;
 .card{width:100%;max-width:430px;background:rgba(15,23,42,.72);border:1px solid rgba(255,255,255,.18);border-radius:28px;padding:22px 22px 22px;backdrop-filter:blur(18px);box-shadow:0 24px 60px rgba(0,0,0,.35)}
 .brand{display:flex;justify-content:center;margin:0 0 8px}
 .brand img{width:176px;height:176px;object-fit:contain;display:block;background:transparent;filter:drop-shadow(0 10px 18px rgba(14,165,233,.28))}
-.face{width:126px;height:126px;margin:0 auto 8px;border-radius:50%;background:linear-gradient(180deg,#fde68a,#f59e0b);position:relative;box-shadow:0 12px 30px rgba(245,158,11,.35);animation:bob 3.4s ease-in-out infinite}
-@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
-.eye{position:absolute;top:46px;width:16px;height:16px;background:#0f172a;border-radius:50%;animation:blink 4.2s infinite}
-.e1{right:36px}.e2{left:36px}
-@keyframes blink{0%,92%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
-.mouth{position:absolute;left:50%;bottom:32px;width:42px;height:20px;border:4px solid #0f172a;border-top:0;border-radius:0 0 24px 24px;transform:translateX(-50%);transition:.25s}
-.face.listen .mouth{width:18px;height:18px;border-radius:50%;border:4px solid #0f172a;background:transparent}
-.face.happy .mouth{width:48px;height:24px;bottom:28px}
-.face.sad .mouth{width:36px;height:16px;bottom:28px;transform:translateX(-50%) rotate(180deg);border-radius:24px 24px 0 0}
-.blush{position:absolute;top:62px;width:18px;height:10px;background:rgba(244,114,182,.45);border-radius:50%;filter:blur(1px)}
-.b1{right:18px}.b2{left:18px}
 h1{margin:6px 0 4px;text-align:center;font-size:26px}
 .sub{text-align:center;color:#cbd5e1;margin:0 0 18px;font-weight:700}
 .live{min-height:28px;text-align:center;color:#f9a8d4;font-weight:800;margin:0 0 12px}
@@ -91,10 +80,9 @@ input{width:100%;padding:14px;border:0;border-radius:14px;margin:0 0 12px;font-f
       <img src="<?= htmlspecialchars($logo, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') ?>">
     </div>
     <?php endif; ?>
-    <div class="face" id="face"><span class="eye e1"></span><span class="eye e2"></span><span class="blush b1"></span><span class="blush b2"></span><span class="mouth"></span></div>
     <h1>مرحباً بك</h1>
     <p class="sub"><?= $logo !== '' ? 'دخول آمن' : htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') . ' — دخول آمن' ?></p>
-    <div class="live" id="live">😊 جاهز لاستقبالك...</div>
+    <div class="live" id="live">جاهز لاستقبالك</div>
     <?php if ($err): ?><div class="err"><?= htmlspecialchars($err, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
     <?= csrf_field() ?>
     <input name="username" id="user" placeholder="اسم المستخدم" required autocomplete="username">
@@ -104,20 +92,14 @@ input{width:100%;padding:14px;border:0;border-radius:14px;margin:0 0 12px;font-f
   </form>
 </div>
 <script>
-const face=document.getElementById('face');
 const live=document.getElementById('live');
-const lines=['😊 النظام لايف الآن','💊 بياناتك محفوظة لكل مندوب','✨ بانتظار دخولك','🔐 الدخول مشفّر'];
+const lines=['النظام لايف الآن','بياناتك محفوظة لكل مندوب','بانتظار دخولك','الدخول مشفّر'];
 let i=0;
 setInterval(function(){ i=(i+1)%lines.length; live.textContent=lines[i]; }, 2200);
-['user','pass'].forEach(function(id){
-  const el=document.getElementById(id);
-  el.addEventListener('focus', function(){ face.className='face listen'; live.textContent='👀 أسمعك...'; });
-  el.addEventListener('blur', function(){ face.className='face'; });
-});
-document.getElementById('box').addEventListener('submit', function(){ face.className='face happy'; live.textContent='😄 جاري التحقق...'; });
-<?php if ($err): ?>face.className='face sad'; live.textContent='😕 <?= addslashes($err) ?>';<?php endif; ?>
+document.getElementById('box').addEventListener('submit', function(){ live.textContent='جاري التحقق...'; });
+<?php if ($err): ?>live.textContent=<?= json_encode($err, JSON_UNESCAPED_UNICODE) ?>;<?php endif; ?>
 const bits=document.getElementById('bits');
-const em=['💊','✨','😊','💚','🟣','⭐'];
+const em=['💊','✨','💚','🟣','⭐'];
 for(let n=0;n<14;n++){
   const s=document.createElement('div');
   s.className='bit'; s.textContent=em[n%em.length];
