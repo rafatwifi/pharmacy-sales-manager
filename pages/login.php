@@ -33,17 +33,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 $qerr = isset($_GET['err']) ? $_GET['err'] : '';
 if ($qerr === 'rejected') $err = 'تم رفض طلب العضوية';
+$settings = load_settings();
+$siteName = !empty($settings['site_name']) ? $settings['site_name'] : 'Medical Sales';
+$logo = site_logo_url();
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>دخول المندوبين</title>
+<title>دخول <?= htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') ?></title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;font-family:'Cairo',Tahoma,sans-serif;color:#fff;overflow:hidden;background:#020617}
+body{margin:0;min-height:100vh;font-family:'Cairo',Tahoma,sans-serif;color:#fff;overflow-x:hidden;background:#020617}
 .bg{position:fixed;inset:0;background:radial-gradient(circle at 20% 20%,#0ea5e9 0%,transparent 32%),radial-gradient(circle at 80% 0%,#db2777 0%,transparent 30%),radial-gradient(circle at 70% 90%,#22c55e 0%,transparent 28%),linear-gradient(180deg,#020617,#0f172a)}
 .orb{position:absolute;border-radius:50%;filter:blur(8px);opacity:.35;animation:float 8s ease-in-out infinite}
 .o1{width:180px;height:180px;background:#38bdf8;top:12%;right:8%;animation-delay:0s}
@@ -53,19 +56,10 @@ body{margin:0;min-height:100vh;font-family:'Cairo',Tahoma,sans-serif;color:#fff;
 .bits{position:fixed;inset:0;pointer-events:none}
 .bit{position:absolute;font-size:22px;animation:rise 7s linear infinite;opacity:.0}
 @keyframes rise{0%{transform:translateY(20px) scale(.7);opacity:0}15%{opacity:.85}100%{transform:translateY(-110vh) scale(1.2);opacity:0}}
-.wrap{position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px}
-.card{width:100%;max-width:430px;background:rgba(15,23,42,.72);border:1px solid rgba(255,255,255,.18);border-radius:28px;padding:28px 22px 22px;backdrop-filter:blur(18px);box-shadow:0 24px 60px rgba(0,0,0,.35)}
-.face{width:126px;height:126px;margin:0 auto 8px;border-radius:50%;background:linear-gradient(180deg,#fde68a,#f59e0b);position:relative;box-shadow:0 12px 30px rgba(245,158,11,.35);animation:bob 3.4s ease-in-out infinite}
-@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
-.eye{position:absolute;top:46px;width:16px;height:16px;background:#0f172a;border-radius:50%;animation:blink 4.2s infinite}
-.e1{right:36px}.e2{left:36px}
-@keyframes blink{0%,92%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
-.mouth{position:absolute;left:50%;bottom:32px;width:42px;height:20px;border:4px solid #0f172a;border-top:0;border-radius:0 0 24px 24px;transform:translateX(-50%);transition:.25s}
-.face.listen .mouth{width:18px;height:18px;border-radius:50%;border:4px solid #0f172a;background:transparent}
-.face.happy .mouth{width:48px;height:24px;bottom:28px}
-.face.sad .mouth{width:36px;height:16px;bottom:28px;transform:translateX(-50%) rotate(180deg);border-radius:24px 24px 0 0}
-.blush{position:absolute;top:62px;width:18px;height:10px;background:rgba(244,114,182,.45);border-radius:50%;filter:blur(1px)}
-.b1{right:18px}.b2{left:18px}
+.wrap{position:relative;z-index:2;min-height:100vh;display:flex;align-items:safe center;justify-content:safe center;padding:18px}
+.card{width:100%;max-width:430px;background:rgba(15,23,42,.72);border:1px solid rgba(255,255,255,.18);border-radius:28px;padding:22px 22px 22px;backdrop-filter:blur(18px);box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.brand{display:flex;justify-content:center;margin:0 0 8px}
+.brand img{width:176px;height:176px;object-fit:contain;display:block;background:transparent;filter:drop-shadow(0 10px 18px rgba(14,165,233,.28))}
 h1{margin:6px 0 4px;text-align:center;font-size:26px}
 .sub{text-align:center;color:#cbd5e1;margin:0 0 18px;font-weight:700}
 .live{min-height:28px;text-align:center;color:#f9a8d4;font-weight:800;margin:0 0 12px}
@@ -81,10 +75,14 @@ input{width:100%;padding:14px;border:0;border-radius:14px;margin:0 0 12px;font-f
 <div class="bits" id="bits"></div>
 <div class="wrap">
   <form class="card" method="post" id="box">
-    <div class="face" id="face"><span class="eye e1"></span><span class="eye e2"></span><span class="blush b1"></span><span class="blush b2"></span><span class="mouth"></span></div>
+    <?php if ($logo !== ''): ?>
+    <div class="brand">
+      <img src="<?= htmlspecialchars($logo, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') ?>">
+    </div>
+    <?php endif; ?>
     <h1>مرحباً بك</h1>
-    <p class="sub">نظام المندوبين الطبي — دخول آمن</p>
-    <div class="live" id="live">😊 جاهز لاستقبالك...</div>
+    <p class="sub"><?= $logo !== '' ? 'دخول آمن' : htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') . ' — دخول آمن' ?></p>
+    <div class="live" id="live">جاهز لاستقبالك</div>
     <?php if ($err): ?><div class="err"><?= htmlspecialchars($err, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
     <?= csrf_field() ?>
     <input name="username" id="user" placeholder="اسم المستخدم" required autocomplete="username">
@@ -94,20 +92,14 @@ input{width:100%;padding:14px;border:0;border-radius:14px;margin:0 0 12px;font-f
   </form>
 </div>
 <script>
-const face=document.getElementById('face');
 const live=document.getElementById('live');
-const lines=['😊 النظام لايف الآن','💊 بياناتك محفوظة لكل مندوب','✨ بانتظار دخولك','🔐 الدخول مشفّر'];
+const lines=['النظام لايف الآن','بياناتك محفوظة لكل مندوب','بانتظار دخولك','الدخول مشفّر'];
 let i=0;
 setInterval(function(){ i=(i+1)%lines.length; live.textContent=lines[i]; }, 2200);
-['user','pass'].forEach(function(id){
-  const el=document.getElementById(id);
-  el.addEventListener('focus', function(){ face.className='face listen'; live.textContent='👀 أسمعك...'; });
-  el.addEventListener('blur', function(){ face.className='face'; });
-});
-document.getElementById('box').addEventListener('submit', function(){ face.className='face happy'; live.textContent='😄 جاري التحقق...'; });
-<?php if ($err): ?>face.className='face sad'; live.textContent='😕 <?= addslashes($err) ?>';<?php endif; ?>
+document.getElementById('box').addEventListener('submit', function(){ live.textContent='جاري التحقق...'; });
+<?php if ($err): ?>live.textContent=<?= json_encode($err, JSON_UNESCAPED_UNICODE) ?>;<?php endif; ?>
 const bits=document.getElementById('bits');
-const em=['💊','✨','😊','💚','🟣','⭐'];
+const em=['💊','✨','💚','🟣','⭐'];
 for(let n=0;n<14;n++){
   const s=document.createElement('div');
   s.className='bit'; s.textContent=em[n%em.length];
