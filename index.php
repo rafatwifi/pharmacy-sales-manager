@@ -21,7 +21,9 @@ $map = array(
     'dashboard' => 'dashboard.php',
     'products' => 'products.php',
     'sales' => 'reports.php',
-    'pharmacies' => 'pharmacies.php'
+    'pharmacies' => 'pharmacies.php',
+    'subscribe' => 'pages/subscribe.php',
+    'about' => 'pages/about.php'
 );
 
 if ($route === 'logout') {

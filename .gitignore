@@ -10,4 +10,5 @@ storage/users.json
 storage/packages.json
 storage/lock.json
 storage/settings.json
+storage/renewals.json
 storage/tenants/

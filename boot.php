@@ -165,8 +165,10 @@ function license_guard() {
 function app_nav_styles() {
     return '.header{border-radius:0 0 32px 32px}'
         . '.userbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 10px}'
-        . '.nav{border-radius:28px !important}'
-        . '.nav a{border-radius:22px !important}'
+        . '.nav{border-radius:28px !important;overflow-x:auto}'
+        . '.nav a{border-radius:22px !important;font-size:12px !important}'
+        . '.logo{display:flex;align-items:center;gap:8px}'
+        . '.logo img{width:36px;height:36px;border-radius:50%;object-fit:cover}'
         . '.search{border-radius:999px !important}'
         . '.card,.widget,.sell-card,.pharmacy-block{border-radius:28px !important}'
         . '.prof{position:relative;z-index:960}'
@@ -186,7 +188,9 @@ function app_nav_styles() {
         . '.prof-panel button,.prof-out{width:100%;border:0;border-radius:16px;padding:11px;font-weight:800;font-family:inherit;cursor:pointer;color:#fff}'
         . '.prof-save{background:linear-gradient(180deg,#38bdf8,#2563eb);margin:0 0 10px}'
         . '.prof-out{display:block;text-align:center;text-decoration:none;background:linear-gradient(180deg,#fb7185,#e11d48);margin-top:6px}'
-        . '.flashbar{background:rgba(16,185,129,.18);color:#bbf7d0;border-radius:18px;padding:10px 12px;margin:0 0 12px;font-weight:800;text-align:center}';
+        . '.flashbar{background:rgba(16,185,129,.18);color:#bbf7d0;border-radius:18px;padding:10px 12px;margin:0 0 12px;font-weight:800;text-align:center}'
+        . '.btn-nav-sub.active{background:linear-gradient(180deg,rgba(125,211,252,.55),rgba(14,165,233,.34))}'
+        . '.btn-nav-about.active{background:linear-gradient(180deg,rgba(167,139,250,.55),rgba(124,58,237,.34))}';
 }
 
 function app_nav($active) {
@@ -197,7 +201,13 @@ function app_nav($active) {
     $avatar = user_avatar_url($user);
     $initial = htmlspecialchars(user_initial($user), ENT_QUOTES, 'UTF-8');
     $flash = take_flash();
-    echo '<div class="userbar"><div class="logo">💊 Medical Sales</div>';
+    $set = load_settings();
+    $siteName = !empty($set['site_name']) ? $set['site_name'] : 'Medical Sales';
+    $siteLogo = site_logo_url();
+    echo '<div class="userbar"><div class="logo">';
+    if ($siteLogo !== '') echo '<img src="' . htmlspecialchars($siteLogo, ENT_QUOTES, 'UTF-8') . '" alt="">';
+    else echo '💊 ';
+    echo htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') . '</div>';
     echo '<div class="prof" id="profBox">';
     echo '<button type="button" class="prof-btn" id="profBtn" title="الملف الشخصي">';
     if ($avatar !== '') {
@@ -243,7 +253,9 @@ function app_nav($active) {
         'dashboard' => array('الداشبورد', 'btn-nav-dash'),
         'products' => array('المنتجات', 'btn-nav-products'),
         'sales' => array('المبيعات', 'btn-nav-sales'),
-        'pharmacies' => array('الصيدليات', 'btn-nav-pharmacies')
+        'pharmacies' => array('الصيدليات', 'btn-nav-pharmacies'),
+        'subscribe' => array('الاشتراك', 'btn-nav-sub'),
+        'about' => array('عن الموقع', 'btn-nav-about')
     );
     foreach ($links as $key => $info) {
         $cls = $info[1] . ($active === $key ? ' active' : '');

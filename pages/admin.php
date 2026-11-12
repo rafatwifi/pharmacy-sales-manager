@@ -2,7 +2,7 @@
 if (!defined('APP_BOOT')) { require_once dirname(__DIR__) . '/auth.php'; }
 $me = app_require_admin();
 $tab = isset($_GET['tab']) ? $_GET['tab'] : 'users';
-$allowedTabs = array('users', 'packages', 'pay', 'account');
+$allowedTabs = array('users', 'packages', 'pay', 'account', 'site');
 if (!in_array($tab, $allowedTabs, true)) $tab = 'users';
 $msg = '';
 $err = '';
@@ -122,6 +122,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             save_settings($settings);
             $msg = 'تم حفظ إعدادات زين كاش';
             $tab = 'pay';
+        } elseif ($action === 'confirm_renewal') {
+            $rid = isset($_POST['rid']) ? $_POST['rid'] : '';
+            $rows = load_renewals();
+            for ($i = 0; $i < count($rows); $i++) {
+                if ($rows[$i]['id'] === $rid && $rows[$i]['status'] === 'pending') {
+                    $pkg = package_by_id($rows[$i]['package_id']);
+                    $days = $pkg && !empty($pkg['days']) ? (int)$pkg['days'] : 30;
+                    update_user($rows[$i]['user_id'], array(
+                        'package_id' => $rows[$i]['package_id'],
+                        'expires_at' => date('Y-m-d H:i', time() + max(1, $days) * 86400),
+                        'status' => 'active',
+                        'pay_method' => 'zaincash'
+                    ));
+                    $rows[$i]['status'] = 'done';
+                    $rows[$i]['done_at'] = date('Y-m-d H:i');
+                    $msg = 'تم تجديد اشتراك ' . $rows[$i]['username'];
+                    break;
+                }
+            }
+            save_renewals($rows);
+            $tab = 'pay';
+        } elseif ($action === 'save_site') {
+            $settings['site_name'] = trim(isset($_POST['site_name']) ? $_POST['site_name'] : '');
+            $settings['site_about'] = trim(isset($_POST['site_about']) ? $_POST['site_about'] : '');
+            if (!empty($_FILES['site_logo']['tmp_name']) && $_FILES['site_logo']['error'] === UPLOAD_ERR_OK) {
+                $ext = strtolower(pathinfo($_FILES['site_logo']['name'], PATHINFO_EXTENSION));
+                $allow = array('jpg','jpeg','png','gif','webp');
+                if (in_array($ext, $allow, true) && @getimagesize($_FILES['site_logo']['tmp_name'])) {
+                    $dir = APP_ROOT . '/uploads/site';
+                    if (!is_dir($dir)) @mkdir($dir, 0755, true);
+                    $fname = 'logo_' . uniqid() . '.' . $ext;
+                    if (move_uploaded_file($_FILES['site_logo']['tmp_name'], $dir . '/' . $fname)) {
+                        if (!empty($settings['site_logo']) && file_exists($dir . '/' . $settings['site_logo'])) {
+                            @unlink($dir . '/' . $settings['site_logo']);
+                        }
+                        $settings['site_logo'] = $fname;
+                    }
+                }
+            }
+            save_settings($settings);
+            $msg = 'تم حفظ إعدادات الموقع';
+            $tab = 'site';
         } elseif ($action === 'change_admin') {
             $newUser = strtolower(trim(isset($_POST['admin_username']) ? $_POST['admin_username'] : ''));
             $newPass = isset($_POST['admin_password']) ? $_POST['admin_password'] : '';
@@ -273,6 +315,7 @@ a{color:inherit}
       <a class="<?= $tab==='users'?'active':'' ?>" href="<?= htmlspecialchars($adminUrl, ENT_QUOTES, 'UTF-8') ?>?tab=users"><span class="ic">👥</span> المستخدمون</a>
       <a class="<?= $tab==='packages'?'active':'' ?>" href="<?= htmlspecialchars($adminUrl, ENT_QUOTES, 'UTF-8') ?>?tab=packages"><span class="ic">📦</span> الباقات</a>
       <a class="<?= $tab==='pay'?'active':'' ?>" href="<?= htmlspecialchars($adminUrl, ENT_QUOTES, 'UTF-8') ?>?tab=pay"><span class="ic">💳</span> الدفع · زين كاش</a>
+      <a class="<?= $tab==='site'?'active':'' ?>" href="<?= htmlspecialchars($adminUrl, ENT_QUOTES, 'UTF-8') ?>?tab=site"><span class="ic">🏠</span> عن الموقع</a>
       <a class="<?= $tab==='account'?'active':'' ?>" href="<?= htmlspecialchars($adminUrl, ENT_QUOTES, 'UTF-8') ?>?tab=account"><span class="ic">🔐</span> حساب المدير</a>
       <a href="<?= htmlspecialchars(url('dashboard'), ENT_QUOTES, 'UTF-8') ?>"><span class="ic">📊</span> نظام المبيعات</a>
     </nav>
@@ -283,7 +326,10 @@ a{color:inherit}
   <div class="main">
     <div class="top">
       <div>
-        <h1><?= $tab==='users'?'المستخدمون':($tab==='packages'?'الباقات':($tab==='pay'?'الدفع بزين كاش':'حساب المدير')) ?></h1>
+        <h1><?php
+          $titles = array('users'=>'المستخدمون','packages'=>'الباقات','pay'=>'الدفع بزين كاش','site'=>'عن الموقع','account'=>'حساب المدير');
+          echo isset($titles[$tab]) ? $titles[$tab] : 'لوحة الإدارة';
+        ?></h1>
         <p>مرحباً <?= htmlspecialchars($me['name'], ENT_QUOTES, 'UTF-8') ?> — إدارة كاملة ومنسّقة لكل اللوحة</p>
       </div>
     </div>
@@ -415,6 +461,23 @@ a{color:inherit}
       <?php endforeach; ?>
     </div>
 
+    <?php elseif ($tab === 'site'): ?>
+    <div class="panel">
+      <h2>إعدادات الموقع</h2>
+      <p style="color:var(--muted);font-weight:700">الاسم والصورة والنبذة تظهر للمندوب في صفحة «عن الموقع».</p>
+      <?php $logoNow = site_logo_url(); if ($logoNow !== ''): ?>
+      <img src="<?= htmlspecialchars($logoNow, ENT_QUOTES, 'UTF-8') ?>" alt="" style="width:96px;height:96px;border-radius:50%;object-fit:cover;margin:0 0 14px">
+      <?php endif; ?>
+      <form method="post" enctype="multipart/form-data">
+        <?= csrf_field() ?>
+        <input type="hidden" name="action" value="save_site">
+        <div class="field"><label>اسم الموقع</label><input name="site_name" value="<?= htmlspecialchars($settings['site_name'], ENT_QUOTES, 'UTF-8') ?>" required></div>
+        <div class="field"><label>صورة الموقع / الشعار</label><input type="file" name="site_logo" accept="image/*"></div>
+        <div class="field"><label>نبذة عن الموقع</label><textarea name="site_about" rows="6"><?= htmlspecialchars($settings['site_about'], ENT_QUOTES, 'UTF-8') ?></textarea></div>
+        <button class="btn ok" type="submit">حفظ إعدادات الموقع</button>
+      </form>
+    </div>
+
     <?php elseif ($tab === 'pay'): ?>
     <div class="zain">
       <h2>وسيلة الدفع: زين كاش</h2>
@@ -435,6 +498,29 @@ a{color:inherit}
         <div><?= htmlspecialchars($settings['zaincash_name']!==''?$settings['zaincash_name']:'اسم المستلم', ENT_QUOTES, 'UTF-8') ?></div>
         <p style="margin:8px 0 0;color:#cbd5e1"><?= htmlspecialchars($settings['zaincash_note'], ENT_QUOTES, 'UTF-8') ?></p>
       </div>
+    </div>
+    <div class="panel" style="margin-top:16px">
+      <h2>طلبات التجديد (زين كاش)</h2>
+      <?php
+        $renewals = load_renewals();
+        $anyR = false;
+        foreach ($renewals as $rn) {
+            if ($rn['status'] !== 'pending') continue;
+            $anyR = true;
+      ?>
+      <div class="member">
+        <div class="who"><div><strong><?= htmlspecialchars($rn['name'], ENT_QUOTES, 'UTF-8') ?></strong><small>@<?= htmlspecialchars($rn['username'], ENT_QUOTES, 'UTF-8') ?></small></div></div>
+        <div class="meta"><span><?= htmlspecialchars($rn['package_name'], ENT_QUOTES, 'UTF-8') ?></span><span><?= number_format((int)$rn['amount']) ?> د.ع</span><span><?= htmlspecialchars($rn['created_at'], ENT_QUOTES, 'UTF-8') ?></span></div>
+        <form method="post">
+          <?= csrf_field() ?>
+          <input type="hidden" name="action" value="confirm_renewal">
+          <input type="hidden" name="rid" value="<?= htmlspecialchars($rn['id'], ENT_QUOTES, 'UTF-8') ?>">
+          <button class="btn ok" type="submit">تأكيد التجديد</button>
+        </form>
+      </div>
+      <?php } if (!$anyR): ?>
+        <p style="color:var(--muted);font-weight:700">لا توجد طلبات تجديد حالياً.</p>
+      <?php endif; ?>
     </div>
     <div class="panel" style="margin-top:16px">
       <h2>الباقات المرتبطة بزين كاش</h2>

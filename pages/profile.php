@@ -1,7 +1,7 @@
 <?php
 if (!defined('APP_BOOT')) { require_once dirname(__DIR__) . '/auth.php'; }
 $user = app_require_login();
-$allowed = array('dashboard', 'products', 'sales', 'pharmacies');
+$allowed = array('dashboard', 'products', 'sales', 'pharmacies', 'subscribe', 'about');
 $back = isset($_POST['back']) ? $_POST['back'] : 'dashboard';
 if (!in_array($back, $allowed, true)) $back = 'dashboard';
 

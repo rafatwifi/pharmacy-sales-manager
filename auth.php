@@ -23,13 +23,27 @@ function load_settings() {
         'zaincash_enabled' => 1,
         'zaincash_number' => '',
         'zaincash_name' => '',
-        'zaincash_note' => 'حوّل مبلغ الباقة عبر زين كاش ثم أخبر الإدارة لتفعيل الاشتراك.'
+        'zaincash_note' => 'حوّل مبلغ الباقة عبر زين كاش ثم أخبر الإدارة لتفعيل الاشتراك.',
+        'site_name' => 'Medical Sales',
+        'site_about' => 'نظام إدارة مبيعات المندوبين الطبيين وتتبع التاركت والصيدليات.',
+        'site_logo' => ''
     );
     $data = load_json_file(settings_file(), array());
     if (!is_array($data)) $data = array();
     return array_merge($defaults, $data);
 }
 function save_settings($data) { return saveJson(settings_file(), $data); }
+function site_logo_url() {
+    $s = load_settings();
+    if (empty($s['site_logo'])) return '';
+    $fs = APP_ROOT . '/uploads/site/' . $s['site_logo'];
+    if (!file_exists($fs)) return '';
+    $base = app_base();
+    return ($base === '' ? '' : $base) . '/uploads/site/' . rawurlencode($s['site_logo']) . '?t=' . filemtime($fs);
+}
+function renewals_file() { return STORAGE_PATH . '/renewals.json'; }
+function load_renewals() { return load_json_file(renewals_file(), array()); }
+function save_renewals($rows) { return saveJson(renewals_file(), array_values($rows)); }
 function delete_user_account($id) {
     $user = find_user_by('id', $id);
     if (!$user || is_admin_user($user)) return false;
