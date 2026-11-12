@@ -27,7 +27,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             update_user($uid, array('status' => 'rejected'));
             $msg = 'تم رفض الطلب';
         } elseif ($action === 'pause') {
-            if ($uid !== 'omar') update_user($uid, array('status' => 'paused'));
+            $target = find_user_by('id', $uid);
+            if ($target && !is_admin_user($target)) update_user($uid, array('status' => 'paused'));
             $msg = 'تم إيقاف المستخدم';
         } elseif ($action === 'resume') {
             $user = find_user_by('id', $uid);
@@ -72,6 +73,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             save_packages($rows);
             $msg = 'تم حفظ الباقة';
             $tab = 'packages';
+        } elseif ($action === 'change_admin') {
+            $newUser = strtolower(trim(isset($_POST['admin_username']) ? $_POST['admin_username'] : ''));
+            $newPass = isset($_POST['admin_password']) ? $_POST['admin_password'] : '';
+            $newPass2 = isset($_POST['admin_password2']) ? $_POST['admin_password2'] : '';
+            $newName = trim(isset($_POST['admin_name']) ? $_POST['admin_name'] : '');
+            if (!preg_match('/^[a-z0-9._-]{3,20}$/', $newUser)) {
+                $err = 'اسم المستخدم 3-20 حرف إنجليزي أو رقم';
+            } else {
+                $taken = find_user_by('username', $newUser);
+                if ($taken && (string)$taken['id'] !== (string)$me['id']) {
+                    $err = 'اسم المستخدم مستخدم مسبقاً';
+                } elseif ($newPass !== '' && $newPass !== $newPass2) {
+                    $err = 'تأكيد كلمة المرور غير مطابق';
+                } elseif ($newPass !== '' && strlen($newPass) < 4) {
+                    $err = 'كلمة المرور قصيرة';
+                } else {
+                    $patch = array('username' => $newUser);
+                    if ($newName !== '') $patch['name'] = $newName;
+                    if ($newPass !== '') $patch['password'] = password_hash($newPass, PASSWORD_BCRYPT);
+                    $me = update_user($me['id'], $patch);
+                    $msg = 'تم تحديث حساب المدير';
+                }
+            }
+            $tab = 'account';
         } elseif ($action === 'delete_pkg') {
             $id = isset($_POST['id']) ? $_POST['id'] : '';
             $rows = load_packages();
@@ -147,6 +172,7 @@ input,select{width:100%;padding:10px;border:0;border-radius:12px;font-family:inh
     <div class="brand">👑 لوحة المدير</div>
     <a class="<?= $tab==='users'?'active':'' ?>" href="<?= htmlspecialchars(url('admin'), ENT_QUOTES, 'UTF-8') ?>?tab=users">المستخدمون</a>
     <a class="<?= $tab==='packages'?'active':'' ?>" href="<?= htmlspecialchars(url('admin'), ENT_QUOTES, 'UTF-8') ?>?tab=packages">الباقات</a>
+    <a class="<?= $tab==='account'?'active':'' ?>" href="<?= htmlspecialchars(url('admin'), ENT_QUOTES, 'UTF-8') ?>?tab=account">حساب المدير</a>
     <a href="<?= htmlspecialchars(url('dashboard'), ENT_QUOTES, 'UTF-8') ?>">نظام المبيعات</a>
     <a href="<?= htmlspecialchars(url('logout'), ENT_QUOTES, 'UTF-8') ?>">خروج</a>
   </aside>
@@ -164,7 +190,21 @@ input,select{width:100%;padding:10px;border:0;border-radius:12px;font-family:inh
       <div class="stat">متوقفون<b><?= $paused ?></b></div>
     </div>
 
-    <?php if ($tab !== 'packages'): ?>
+    <?php if ($tab === 'account'): ?>
+    <div class="card">
+      <h3>تغيير دخول المدير</h3>
+      <p style="color:#cbd5e1;font-weight:700">الحالي: <?= htmlspecialchars($me['username'], ENT_QUOTES, 'UTF-8') ?></p>
+      <form method="post" class="form-grid">
+        <?= csrf_field() ?>
+        <input type="hidden" name="action" value="change_admin">
+        <input name="admin_name" value="<?= htmlspecialchars($me['name'], ENT_QUOTES, 'UTF-8') ?>" placeholder="الاسم">
+        <input name="admin_username" value="<?= htmlspecialchars($me['username'], ENT_QUOTES, 'UTF-8') ?>" placeholder="اسم المستخدم" required>
+        <input type="password" name="admin_password" placeholder="كلمة مرور جديدة (اختياري)">
+        <input type="password" name="admin_password2" placeholder="تأكيد كلمة المرور">
+        <button class="btn ok" type="submit">حفظ</button>
+      </form>
+    </div>
+    <?php elseif ($tab !== 'packages'): ?>
     <div class="card">
       <h3>المندوبون</h3>
       <div class="table-wrap">
@@ -231,7 +271,7 @@ input,select{width:100%;padding:10px;border:0;border-radius:12px;font-family:inh
 </html>
 <?php
 function include_user_actions($u, $packages) {
-    if ($u['id'] === 'omar') { echo '<span>مدير</span>'; return; }
+    if (is_admin_user($u)) { echo '<span>مدير</span>'; return; }
     echo '<div class="rowacts">';
     if ($u['status'] === 'pending') {
         echo '<form method="post">'.csrf_field().'<input type="hidden" name="uid" value="'.htmlspecialchars($u['id'], ENT_QUOTES, 'UTF-8').'">';

@@ -1,5 +1,6 @@
 <?php
 if (!defined('APP_BOOT')) { require_once dirname(__DIR__) . '/auth.php'; }
+if (current_user() && is_admin_user(current_user())) redirect('admin', array());
 if (current_user() && subscription_ok(current_user())) redirect('dashboard', array());
 
 $err = '';
@@ -25,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect('expired', array());
         } else {
             login_user($user);
+            if (is_admin_user($user)) redirect('admin', array());
             redirect('dashboard', array());
         }
     }

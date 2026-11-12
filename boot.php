@@ -104,20 +104,52 @@ function load_json_file($file, $default) {
     return is_array($data) ? $data : $default;
 }
 
-function license_ok() {
-    if (php_sapi_name() === 'cli') return true;
-    $allowed = array('127.0.0.1', '::1', 'localhost', '195.7.9.14');
-    $lockFile = STORAGE_PATH . '/lock.json';
-    if (file_exists($lockFile)) {
-        $lock = json_decode(decrypt_payload(file_get_contents($lockFile)), true);
-        if (is_array($lock) && !empty($lock['hosts']) && is_array($lock['hosts'])) {
-            $allowed = $lock['hosts'];
+function licensed_hosts() {
+    return array(
+        '127.0.0.1',
+        '::1',
+        'localhost',
+        '195.7.9.14',
+        'admin.isp-wifi.com',
+        'isp-wifi.com'
+    );
+}
+
+function request_host_names() {
+    $out = array();
+    $keys = array('HTTP_HOST', 'SERVER_NAME', 'HTTP_X_FORWARDED_HOST', 'SERVER_ADDR');
+    for ($i = 0; $i < count($keys); $i++) {
+        $k = $keys[$i];
+        if (empty($_SERVER[$k])) continue;
+        $parts = preg_split('/\s*,\s*/', (string)$_SERVER[$k]);
+        for ($j = 0; $j < count($parts); $j++) {
+            $p = strtolower(preg_replace('/:\d+$/', '', trim($parts[$j])));
+            if ($p !== '') $out[] = $p;
         }
     }
-    $ip = isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : '';
-    $host = isset($_SERVER['HTTP_HOST']) ? preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST']) : '';
-    for ($i = 0; $i < count($allowed); $i++) {
-        if ($allowed[$i] === $ip || $allowed[$i] === $host) return true;
+    return array_values(array_unique($out));
+}
+
+function license_ok() {
+    if (php_sapi_name() === 'cli') return true;
+    $allowed = licensed_hosts();
+    $lockFile = STORAGE_PATH . '/lock.json';
+    if (file_exists($lockFile)) {
+        $raw = file_get_contents($lockFile);
+        $lock = json_decode(decrypt_payload($raw), true);
+        if (!is_array($lock)) $lock = json_decode($raw, true);
+        if (is_array($lock) && !empty($lock['hosts']) && is_array($lock['hosts'])) {
+            $allowed = array_values(array_unique(array_merge($allowed, $lock['hosts'])));
+        }
+    }
+    $seen = request_host_names();
+    for ($i = 0; $i < count($seen); $i++) {
+        $h = $seen[$i];
+        for ($j = 0; $j < count($allowed); $j++) {
+            $a = strtolower($allowed[$j]);
+            if ($h === $a) return true;
+            if ($a === 'isp-wifi.com' && strlen($h) > 13 && substr($h, -13) === '.isp-wifi.com') return true;
+        }
     }
     return false;
 }
@@ -142,7 +174,7 @@ function app_nav_styles() {
 function app_nav($active) {
     $user = current_user();
     $name = $user ? $user['name'] : '';
-    $isAdmin = $user && !empty($user['role']) && $user['role'] === 'admin';
+    $isAdmin = is_admin_user($user);
     echo '<div class="userbar"><div class="logo">💊 Medical Sales</div><div class="userchip">';
     echo '<b>' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '</b>';
     if ($isAdmin) echo '<a class="admin" href="' . htmlspecialchars(url('admin'), ENT_QUOTES, 'UTF-8') . '">لوحة المدير</a>';

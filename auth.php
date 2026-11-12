@@ -59,6 +59,10 @@ function current_user() {
     return find_user_by('id', $_SESSION['uid']);
 }
 
+function is_admin_user($user) {
+    return $user && !empty($user['role']) && $user['role'] === 'admin';
+}
+
 function login_user($user) {
     session_regenerate_id(true);
     $_SESSION['uid'] = $user['id'];
@@ -90,14 +94,14 @@ function csrf_ok() {
 
 function user_expired($user) {
     if (!$user) return true;
-    if (!empty($user['role']) && $user['role'] === 'admin') return false;
+    if (is_admin_user($user)) return false;
     if (empty($user['expires_at'])) return true;
     return strtotime($user['expires_at']) < time();
 }
 
 function subscription_ok($user) {
     if (!$user) return false;
-    if (!empty($user['role']) && $user['role'] === 'admin') return true;
+    if (is_admin_user($user)) return true;
     if (empty($user['status']) || $user['status'] !== 'active') return false;
     return !user_expired($user);
 }
@@ -150,9 +154,76 @@ function app_require_login() {
 }
 
 function app_require_admin() {
-    $user = app_require_login();
-    if (empty($user['role']) || $user['role'] !== 'admin') redirect('dashboard', array());
+    $user = current_user();
+    if (!$user) redirect('login', array());
+    if (!is_admin_user($user)) redirect('dashboard', array());
     return $user;
+}
+
+function default_admin_user() {
+    return array(
+        'id' => 'admin',
+        'username' => 'admin',
+        'password' => password_hash('1234', PASSWORD_BCRYPT),
+        'name' => 'المدير',
+        'role' => 'admin',
+        'status' => 'active',
+        'package_id' => 'pro',
+        'expires_at' => '2035-12-31 23:59',
+        'created_at' => date('Y-m-d H:i'),
+        'wait_token' => ''
+    );
+}
+
+function default_omar_user() {
+    return array(
+        'id' => 'omar',
+        'username' => 'omar',
+        'password' => password_hash('1234', PASSWORD_BCRYPT),
+        'name' => 'Omar',
+        'role' => 'rep',
+        'status' => 'active',
+        'package_id' => 'pro',
+        'expires_at' => '2035-12-31 23:59',
+        'created_at' => date('Y-m-d H:i'),
+        'wait_token' => ''
+    );
+}
+
+function app_migrate_accounts() {
+    $users = load_users();
+    $changed = false;
+    $hasAdmin = false;
+    $hasOmar = false;
+    for ($i = 0; $i < count($users); $i++) {
+        if ($users[$i]['id'] === 'omar' || (isset($users[$i]['username']) && $users[$i]['username'] === 'omar')) {
+            $hasOmar = true;
+            if (!empty($users[$i]['role']) && $users[$i]['role'] === 'admin') {
+                $users[$i]['role'] = 'rep';
+                $users[$i]['status'] = 'active';
+                if (empty($users[$i]['package_id'])) $users[$i]['package_id'] = 'pro';
+                if (empty($users[$i]['expires_at'])) $users[$i]['expires_at'] = '2035-12-31 23:59';
+                $changed = true;
+            }
+        }
+        if ($users[$i]['id'] === 'admin' || (!empty($users[$i]['role']) && $users[$i]['role'] === 'admin')) {
+            $hasAdmin = true;
+        }
+    }
+    if (!$hasOmar) {
+        $users[] = default_omar_user();
+        $changed = true;
+    }
+    if (!$hasAdmin) {
+        $users[] = default_admin_user();
+        $changed = true;
+    }
+    if ($changed) save_users($users);
+    ensure_tenant_files('omar');
+    $lockFile = STORAGE_PATH . '/lock.json';
+    $hosts = licensed_hosts();
+    file_put_contents($lockFile, json_encode(array('hosts' => $hosts), JSON_UNESCAPED_UNICODE), LOCK_EX);
+    @chmod($lockFile, 0600);
 }
 
 function default_packages() {
@@ -167,7 +238,7 @@ function app_install() {
     $lockFile = STORAGE_PATH . '/lock.json';
     if (!file_exists($lockFile)) {
         file_put_contents($lockFile, json_encode(array(
-            'hosts' => array('127.0.0.1', '::1', 'localhost', '195.7.9.14')
+            'hosts' => licensed_hosts()
         ), JSON_UNESCAPED_UNICODE), LOCK_EX);
         @chmod($lockFile, 0600);
     }
@@ -175,20 +246,7 @@ function app_install() {
         save_packages(default_packages());
     }
     if (!file_exists(users_file())) {
-        $hash = password_hash('1234', PASSWORD_BCRYPT);
-        $omar = array(
-            'id' => 'omar',
-            'username' => 'omar',
-            'password' => $hash,
-            'name' => 'Omar',
-            'role' => 'admin',
-            'status' => 'active',
-            'package_id' => 'pro',
-            'expires_at' => '2035-12-31 23:59',
-            'created_at' => date('Y-m-d H:i'),
-            'wait_token' => ''
-        );
-        save_users(array($omar));
+        save_users(array(default_admin_user(), default_omar_user()));
         ensure_tenant_files('omar');
         $seedDir = STORAGE_PATH . '/tenants/omar';
         $roots = array(
@@ -220,4 +278,5 @@ function app_install() {
             }
         }
     }
+    app_migrate_accounts();
 }

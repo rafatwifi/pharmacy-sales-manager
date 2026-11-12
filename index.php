@@ -4,6 +4,7 @@ require_once __DIR__ . '/auth.php';
 $route = app_route();
 if ($route === '') {
     $u = current_user();
+    if ($u && is_admin_user($u)) redirect('admin', array());
     if ($u && subscription_ok($u)) redirect('dashboard', array());
     if ($u && isset($u['status']) && $u['status'] === 'pending') redirect('pending', array());
     redirect('login', array());
