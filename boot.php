@@ -163,32 +163,38 @@ function license_guard() {
 }
 
 function app_nav_styles() {
-    return '.header{border-radius:0 0 32px 32px}'
-        . '.userbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 10px}'
-        . '.nav{border-radius:28px !important;overflow-x:auto}'
-        . '.nav a{border-radius:22px !important;font-size:12px !important}'
-        . '.logo{display:flex;align-items:center;gap:8px}'
-        . '.logo img{width:36px;height:36px;border-radius:50%;object-fit:cover}'
+    return '.header{position:sticky;top:8px;z-index:850;overflow:visible !important;margin:0 0 16px !important;padding:10px 12px !important;border-radius:28px !important;background:rgba(2,6,23,.94) !important;border:1px solid rgba(255,255,255,.14) !important;box-shadow:0 10px 28px rgba(0,0,0,.22) !important;gap:10px !important}'
+        . '.userbar{display:flex;align-items:center;justify-content:flex-start;gap:10px;margin:0}'
+        . '.nav{border-radius:999px !important;overflow-x:auto}'
+        . '.nav a{border-radius:999px !important;font-size:12px !important}'
+        . '.logo{display:flex;align-items:center;gap:8px;font-size:18px !important;font-weight:800;line-height:1;min-width:0}'
+        . '.logo img{width:32px;height:32px;border-radius:50%;object-fit:cover;flex:0 0 auto}'
         . '.search{border-radius:999px !important}'
-        . '.card,.widget,.sell-card,.pharmacy-block{border-radius:28px !important}'
-        . '.prof{position:relative;z-index:960}'
-        . '.prof-btn{width:48px;height:48px;border:0;padding:0;border-radius:50%;overflow:hidden;cursor:pointer;background:linear-gradient(135deg,#38bdf8,#8b5cf6);box-shadow:0 8px 20px rgba(15,23,42,.28);display:grid;place-items:center}'
-        . '.prof-btn img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}'
-        . '.prof-btn span{color:#fff;font-weight:800;font-size:18px}'
-        . '.prof-panel{display:none;position:absolute;top:calc(100% + 10px);left:0;width:min(340px,calc(100vw - 24px));background:linear-gradient(180deg,#111827,#0b1220);border:1px solid rgba(255,255,255,.12);border-radius:28px;padding:16px;box-shadow:0 24px 50px rgba(0,0,0,.4);z-index:970}'
+        . '.card,.widget,.sell-card,.pharmacy-block,.hero,.box,.zain{border-radius:28px !important}'
+        . '.prof{position:relative;z-index:960;flex:0 0 auto;width:40px;height:40px}'
+        . '.prof-btn{width:40px;height:40px;padding:0;margin:0;border:0;border-radius:50%;overflow:hidden;cursor:pointer;background:linear-gradient(135deg,#38bdf8,#8b5cf6);display:block;line-height:0;-webkit-appearance:none;appearance:none;box-shadow:0 0 0 2px rgba(255,255,255,.42)}'
+        . '.prof-btn img{width:40px;height:40px;object-fit:cover;border-radius:50%;display:block}'
+        . '.prof-btn span{color:#fff;font-weight:800;font-size:15px;line-height:40px;width:40px;height:40px;display:block;text-align:center}'
+        . '.prof-panel{display:none;position:absolute;top:calc(100% + 10px);right:0;left:auto;width:236px;background:#0f172a;border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:6px;box-shadow:0 18px 40px rgba(0,0,0,.38);z-index:970}'
         . '.prof.open .prof-panel{display:block}'
-        . '.prof-head{display:flex;align-items:center;gap:12px;margin:0 0 14px}'
-        . '.prof-photo{position:relative;width:72px;height:72px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#38bdf8,#8b5cf6);flex:0 0 auto}'
-        . '.prof-photo img,.prof-photo .ph{width:100%;height:100%;object-fit:cover;display:grid;place-items:center;font-size:28px;font-weight:800}'
-        . '.prof-photo label{position:absolute;inset:auto 0 0 0;background:rgba(2,6,23,.72);color:#fff;font-size:11px;font-weight:800;text-align:center;padding:4px 0;cursor:pointer}'
-        . '.prof-head b{display:block;font-size:16px}'
-        . '.prof-head small{color:#94a3b8;font-weight:700}'
-        . '.prof-panel input{width:100%;padding:11px 12px;border:0;border-radius:16px;margin:0 0 8px;font-family:inherit;text-align:center}'
-        . '.prof-panel label.lbl{display:block;color:#cbd5e1;font-size:12px;font-weight:800;margin:0 0 4px}'
-        . '.prof-panel button,.prof-out{width:100%;border:0;border-radius:16px;padding:11px;font-weight:800;font-family:inherit;cursor:pointer;color:#fff}'
-        . '.prof-save{background:linear-gradient(180deg,#38bdf8,#2563eb);margin:0 0 10px}'
-        . '.prof-out{display:block;text-align:center;text-decoration:none;background:linear-gradient(180deg,#fb7185,#e11d48);margin-top:6px}'
-        . '.flashbar{background:rgba(16,185,129,.18);color:#bbf7d0;border-radius:18px;padding:10px 12px;margin:0 0 12px;font-weight:800;text-align:center}'
+        . '.prof-mini{display:flex;align-items:center;gap:8px;padding:8px 10px}'
+        . '.prof-mini .dot{width:32px;height:32px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#38bdf8,#8b5cf6);display:flex;align-items:center;justify-content:center;font-weight:800;flex:0 0 auto}'
+        . '.prof-mini .dot img{width:100%;height:100%;object-fit:cover;display:block}'
+        . '.prof-mini b{display:block;font-size:13px;line-height:1.2}'
+        . '.prof-mini small{color:#94a3b8;font-weight:700}'
+        . '.prof-panel details{border-top:1px solid rgba(255,255,255,.08)}'
+        . '.prof-panel summary{list-style:none;cursor:pointer;padding:9px 12px;font-weight:800;font-size:13px;border-radius:12px}'
+        . '.prof-panel summary::-webkit-details-marker{display:none}'
+        . '.prof-panel summary:after{content:"▾";float:left;opacity:.7}'
+        . '.prof-panel details[open] summary{background:rgba(255,255,255,.06)}'
+        . '.drop{padding:0 10px 10px}'
+        . '.prof-panel input{width:100%;padding:9px 10px;border:0;border-radius:12px;margin:0 0 7px;font-family:inherit;text-align:center}'
+        . '.prof-panel input[type=file]{display:none}'
+        . '.pick{display:block;text-align:center;background:rgba(255,255,255,.08);border-radius:12px;padding:9px;font-weight:800;cursor:pointer}'
+        . '.prof-panel button,.prof-out{width:100%;border:0;border-radius:12px;padding:9px;font-weight:800;font-family:inherit;cursor:pointer;color:#fff}'
+        . '.prof-save{background:linear-gradient(180deg,#38bdf8,#2563eb)}'
+        . '.prof-out{display:block;text-align:center;text-decoration:none;background:linear-gradient(180deg,#fb7185,#e11d48);margin-top:4px}'
+        . '.flashbar{background:rgba(16,185,129,.18);color:#bbf7d0;border-radius:16px;padding:8px 10px;margin:8px 0 0;font-weight:800;text-align:center}'
         . '.btn-nav-sub.active{background:linear-gradient(180deg,rgba(125,211,252,.55),rgba(14,165,233,.34))}'
         . '.btn-nav-about.active{background:linear-gradient(180deg,rgba(167,139,250,.55),rgba(124,58,237,.34))}';
 }
@@ -204,49 +210,44 @@ function app_nav($active) {
     $set = load_settings();
     $siteName = !empty($set['site_name']) ? $set['site_name'] : 'Medical Sales';
     $siteLogo = site_logo_url();
-    echo '<div class="userbar"><div class="logo">';
+    $back = htmlspecialchars($active, ENT_QUOTES, 'UTF-8');
+    $actionUrl = htmlspecialchars(url('profile'), ENT_QUOTES, 'UTF-8');
+    $avatarHtml = $avatar !== ''
+        ? '<img src="' . htmlspecialchars($avatar, ENT_QUOTES, 'UTF-8') . '" alt="">'
+        : '<span>' . $initial . '</span>';
+    $dotHtml = $avatar !== ''
+        ? '<img src="' . htmlspecialchars($avatar, ENT_QUOTES, 'UTF-8') . '" alt="">'
+        : $initial;
+
+    echo '<div class="userbar">';
+    echo '<div class="prof" id="profBox">';
+    echo '<button type="button" class="prof-btn" id="profBtn" title="الملف الشخصي">' . $avatarHtml . '</button>';
+    echo '<div class="prof-panel">';
+    echo '<div class="prof-mini"><div class="dot">' . $dotHtml . '</div>';
+    echo '<div><b>' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '</b><small dir="ltr">@' . htmlspecialchars($user ? $user['username'] : '', ENT_QUOTES, 'UTF-8') . '</small></div></div>';
+    if ($isAdmin) {
+        echo '<a class="prof-save" style="display:block;text-align:center;text-decoration:none;margin:0 8px 8px;background:linear-gradient(180deg,#fbbf24,#d97706)" href="' . htmlspecialchars(url('admin'), ENT_QUOTES, 'UTF-8') . '">لوحة المدير</a>';
+    }
+    echo '<details><summary>الصورة الشخصية</summary><div class="drop"><form method="post" action="' . $actionUrl . '" enctype="multipart/form-data">';
+    echo csrf_field() . '<input type="hidden" name="action" value="photo"><input type="hidden" name="back" value="' . $back . '">';
+    echo '<label class="pick">اختيار صورة<input type="file" name="avatar" accept="image/*" onchange="this.form.submit()"></label></form></div></details>';
+    echo '<details><summary>المعلومات الشخصية</summary><div class="drop"><form method="post" action="' . $actionUrl . '">';
+    echo csrf_field() . '<input type="hidden" name="action" value="info"><input type="hidden" name="back" value="' . $back . '">';
+    echo '<input name="name" value="' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '" placeholder="الاسم" required>';
+    echo '<input name="phone" value="' . htmlspecialchars($phone, ENT_QUOTES, 'UTF-8') . '" placeholder="الهاتف">';
+    echo '<button class="prof-save" type="submit">حفظ</button></form></div></details>';
+    echo '<details><summary>كلمة المرور</summary><div class="drop"><form method="post" action="' . $actionUrl . '">';
+    echo csrf_field() . '<input type="hidden" name="action" value="pass"><input type="hidden" name="back" value="' . $back . '">';
+    echo '<input type="password" name="new_pass" placeholder="كلمة مرور جديدة" required>';
+    echo '<input type="password" name="new_pass2" placeholder="تأكيد كلمة المرور" required>';
+    echo '<button class="prof-save" type="submit">تحديث</button></form></div></details>';
+    echo '<a class="prof-out" href="' . htmlspecialchars(url('logout'), ENT_QUOTES, 'UTF-8') . '">تسجيل خروج</a>';
+    echo '</div></div>';
+    echo '<div class="logo">';
     if ($siteLogo !== '') echo '<img src="' . htmlspecialchars($siteLogo, ENT_QUOTES, 'UTF-8') . '" alt="">';
     else echo '💊 ';
     echo htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') . '</div>';
-    echo '<div class="prof" id="profBox">';
-    echo '<button type="button" class="prof-btn" id="profBtn" title="الملف الشخصي">';
-    if ($avatar !== '') {
-        echo '<img src="' . htmlspecialchars($avatar, ENT_QUOTES, 'UTF-8') . '" alt="">';
-    } else {
-        echo '<span>' . $initial . '</span>';
-    }
-    echo '</button>';
-    echo '<div class="prof-panel">';
-    echo '<div class="prof-head">';
-    echo '<form method="post" action="' . htmlspecialchars(url('profile'), ENT_QUOTES, 'UTF-8') . '" enctype="multipart/form-data" class="prof-photo">';
-    echo csrf_field();
-    echo '<input type="hidden" name="action" value="photo">';
-    echo '<input type="hidden" name="back" value="' . htmlspecialchars($active, ENT_QUOTES, 'UTF-8') . '">';
-    if ($avatar !== '') echo '<img src="' . htmlspecialchars($avatar, ENT_QUOTES, 'UTF-8') . '" alt="">';
-    else echo '<div class="ph">' . $initial . '</div>';
-    echo '<label>تغيير الصورة<input type="file" name="avatar" accept="image/*" onchange="this.form.submit()" style="display:none"></label>';
-    echo '</form>';
-    echo '<div><b>' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '</b><small>@' . htmlspecialchars($user ? $user['username'] : '', ENT_QUOTES, 'UTF-8') . '</small></div>';
     echo '</div>';
-    if ($isAdmin) echo '<a class="prof-save" style="display:block;text-align:center;text-decoration:none;margin-bottom:10px;background:linear-gradient(180deg,#fbbf24,#d97706)" href="' . htmlspecialchars(url('admin'), ENT_QUOTES, 'UTF-8') . '">لوحة المدير</a>';
-    echo '<form method="post" action="' . htmlspecialchars(url('profile'), ENT_QUOTES, 'UTF-8') . '">';
-    echo csrf_field();
-    echo '<input type="hidden" name="action" value="info">';
-    echo '<input type="hidden" name="back" value="' . htmlspecialchars($active, ENT_QUOTES, 'UTF-8') . '">';
-    echo '<label class="lbl">الاسم</label><input name="name" value="' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '" required>';
-    echo '<label class="lbl">الهاتف</label><input name="phone" value="' . htmlspecialchars($phone, ENT_QUOTES, 'UTF-8') . '" placeholder="رقم الهاتف">';
-    echo '<button class="prof-save" type="submit">حفظ المعلومات</button>';
-    echo '</form>';
-    echo '<form method="post" action="' . htmlspecialchars(url('profile'), ENT_QUOTES, 'UTF-8') . '">';
-    echo csrf_field();
-    echo '<input type="hidden" name="action" value="pass">';
-    echo '<input type="hidden" name="back" value="' . htmlspecialchars($active, ENT_QUOTES, 'UTF-8') . '">';
-    echo '<label class="lbl">كلمة مرور جديدة</label><input type="password" name="new_pass" required>';
-    echo '<label class="lbl">تأكيد كلمة المرور</label><input type="password" name="new_pass2" required>';
-    echo '<button class="prof-save" type="submit">تعديل كلمة المرور</button>';
-    echo '</form>';
-    echo '<a class="prof-out" href="' . htmlspecialchars(url('logout'), ENT_QUOTES, 'UTF-8') . '">تسجيل خروج</a>';
-    echo '</div></div></div>';
     if ($flash !== '') echo '<div class="flashbar">' . htmlspecialchars($flash, ENT_QUOTES, 'UTF-8') . '</div>';
     echo '<div class="nav">';
     $links = array(
@@ -262,5 +263,5 @@ function app_nav($active) {
         echo '<a class="' . $cls . '" href="' . htmlspecialchars(url($key), ENT_QUOTES, 'UTF-8') . '">' . $info[0] . '</a>';
     }
     echo '</div>';
-    echo '<script>(function(){var b=document.getElementById("profBox");var t=document.getElementById("profBtn");if(!b||!t)return;t.addEventListener("click",function(e){e.stopPropagation();b.classList.toggle("open");});document.addEventListener("click",function(e){if(!b.contains(e.target))b.classList.remove("open");});})();</script>';
+    echo '<script>(function(){var b=document.getElementById("profBox");var t=document.getElementById("profBtn");if(!b||!t)return;t.addEventListener("click",function(e){e.stopPropagation();b.classList.toggle("open");});document.addEventListener("click",function(e){if(!b.contains(e.target))b.classList.remove("open");});var ds=b.querySelectorAll("details");for(var i=0;i<ds.length;i++){ds[i].addEventListener("toggle",function(){if(!this.open)return;for(var j=0;j<ds.length;j++){if(ds[j]!==this)ds[j].open=false;}});}})();</script>';
 }

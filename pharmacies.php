@@ -42,8 +42,8 @@ function renderPharmacyProducts($info) {
 *{box-sizing:border-box}html{scroll-behavior:smooth}
 body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(circle at top,#0ea5e9,#0f172a 45%,#020617);color:white;min-height:100vh}
 .container{width:100%;max-width:1300px;margin:auto;padding:16px}
-.header{position:sticky;top:0;z-index:850;display:flex;flex-direction:column;align-items:stretch;gap:10px;margin:0 0 16px;padding:10px 0 12px;background:linear-gradient(180deg,rgba(2,6,23,.96),rgba(2,6,23,.84) 78%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
-.logo{font-size:26px;font-weight:bold}
+.header{position:sticky;top:8px;z-index:850;display:flex;flex-direction:column;align-items:stretch}
+.logo{font-size:18px;font-weight:800}
 <?= app_nav_styles() ?>
 .nav{display:flex;flex-wrap:nowrap;gap:4px;width:100%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:28px;padding:6px}
 .nav a{flex:1 1 0;min-width:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#e2e8f0;text-decoration:none;padding:11px 8px;border-radius:22px;font-weight:800;font-size:14px;border:0;background:transparent}
