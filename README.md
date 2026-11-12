@@ -1,36 +1,15 @@
 # Pharmacy Sales Manager
 
-نظام إدارة مبيعات الصيدليات والمنتجات الطبية — تتبع المبيعات، التاركت، والصيدليات.
+نظام إدارة مبيعات المندوبين الطبيين — متعدد الحسابات، باقات، ولوحة مدير.
 
-Medical/pharmacy sales tracking app for managing products, recording sales by pharmacy, and viewing reports.
+## الدخول
 
-## Features
+- الرابط: `/pharmacy-sales-manager/login`
+- المدير: `omar` / `1234`
+- تسجيل عضوية جديدة يبقى بانتظار موافقة المدير، والصفحة تبقى لايف حتى يتم القبول ثم يدخل تلقائياً.
 
-- Product management with images and sales targets
-- Direct sales recording with pharmacy name and quantity
-- Sales reports by product and pharmacy
-- Arabic RTL interface with Cairo font
+## الملفات
 
-## Requirements
-
-- PHP 7.4+ with file upload support
-
-## Run locally
-
-```bash
-cd dr-omar
-php -S localhost:8000
-```
-
-Open:
-- http://localhost:8000/dashboard.php
-- http://localhost:8000/products.php
-- http://localhost:8000/reports.php
-
-## Data
-
-Sales and products are stored in JSON files:
-- `data.json` — products
-- `sales.json` — sales transactions
-
-Product images are saved under `uploads/products/`.
+- `index.php` الموجّه بدون ظهور `.php` في الرابط
+- بيانات كل مندوب مشفّرة داخل `storage/tenants/`
+- JSON فقط، بدون قاعدة SQL

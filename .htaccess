@@ -1,0 +1,24 @@
+Options -Indexes
+RewriteEngine On
+RewriteBase /pharmacy-sales-manager/
+
+<FilesMatch "\.(json|key|log|md)$">
+    Require all denied
+</FilesMatch>
+
+<FilesMatch "^(boot|auth|store)\.php$">
+    Require all denied
+</FilesMatch>
+
+RewriteRule ^storage/ - [F,L]
+RewriteRule ^pages/ - [F,L]
+
+RewriteCond %{THE_REQUEST} \s/+pharmacy-sales-manager/([^\s?]*)\.php[\s?] [NC]
+RewriteCond %1 !^index$
+RewriteRule ^ %1 [R=301,L]
+
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+RewriteRule ^ index.php [QSA,L]

@@ -1,25 +1,22 @@
 <?php
-$dataFile = __DIR__ . '/data.json';
-$uploadPath = 'uploads/products/';
+require_once __DIR__ . '/store.php';
 
-if (!file_exists('uploads')) mkdir('uploads', 0777, true);
-if (!file_exists($uploadPath)) mkdir($uploadPath, 0777, true);
-if (!file_exists($dataFile)) file_put_contents($dataFile, '[]');
-
-$products = json_decode(file_get_contents($dataFile), true) ?: [];
+$products = loadProducts();
 $msg = '';
 
 function saveProducts($data) {
     global $dataFile;
-    file_put_contents($dataFile, json_encode(array_values($data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
+    saveJson($dataFile, array_values($data));
 }
 
 function handleUpload($file) {
-    global $uploadPath;
-    if ($file['error'] === UPLOAD_ERR_OK) {
-        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+    global $uploadFs;
+    if (!empty($file['tmp_name']) && isset($file['error']) && $file['error'] === UPLOAD_ERR_OK) {
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $allow = array('jpg','jpeg','png','gif','webp');
+        if (!in_array($ext, $allow, true)) return '';
         $newName = uniqid('prod_') . '.' . $ext;
-        move_uploaded_file($file['tmp_name'], $uploadPath . $newName);
+        move_uploaded_file($file['tmp_name'], $uploadFs . $newName);
         return $newName;
     }
     return '';
@@ -27,17 +24,22 @@ function handleUpload($file) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['add'])) {
-        $image = handleUpload($_FILES['image']);
-        $products[] = [
-            'id' => uniqid(),
-            'name' => trim($_POST['name']),
-            'price' => (float)$_POST['price'],
-            'target_qty' => (int)$_POST['target_qty'],
-            'image' => $image
-        ];
-        saveProducts($products);
-        header('Location: products.php?msg=added');
-        exit;
+        $limits = package_limits();
+        if ($limits['max_products'] > 0 && count($products) >= $limits['max_products']) {
+            $msg = 'وصلت حد المنتجات في باقتك ❌';
+        } else {
+            $image = handleUpload(isset($_FILES['image']) ? $_FILES['image'] : array());
+            $products[] = array(
+                'id' => uniqid(),
+                'name' => trim($_POST['name']),
+                'price' => (float)$_POST['price'],
+                'target_qty' => (int)$_POST['target_qty'],
+                'image' => $image
+            );
+            saveProducts($products);
+            header('Location: ' . url('products') . '?msg=added');
+            exit;
+        }
     }
 
     if (isset($_POST['edit'])) {
@@ -48,8 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $p['price'] = (float)$_POST['price'];
                 $p['target_qty'] = (int)$_POST['target_qty'];
                 if (!empty($_FILES['image']['name'])) {
-                    if ($p['image'] && file_exists($uploadPath . $p['image'])) {
-                        unlink($uploadPath . $p['image']);
+                    if ($p['image'] && file_exists($uploadFs . $p['image'])) {
+                        unlink($uploadFs . $p['image']);
                     }
                     $p['image'] = handleUpload($_FILES['image']);
                 }
@@ -58,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         unset($p);
         saveProducts($products);
-        header('Location: products.php?msg=edited');
+        header('Location: ' . url('products') . '?msg=edited');
         exit;
     }
 
@@ -66,15 +68,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = $_POST['id'];
         foreach ($products as $k => $p) {
             if ($p['id'] === $id) {
-                if ($p['image'] && file_exists($uploadPath . $p['image'])) {
-                    unlink($uploadPath . $p['image']);
+                if ($p['image'] && file_exists($uploadFs . $p['image'])) {
+                    unlink($uploadFs . $p['image']);
                 }
                 unset($products[$k]);
                 break;
             }
         }
         saveProducts($products);
-        header('Location: products.php?msg=deleted');
+        header('Location: ' . url('products') . '?msg=deleted');
         exit;
     }
 }
@@ -99,6 +101,7 @@ body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(c
 .container{width:100%;max-width:1300px;margin:auto;padding:16px}
 .header{position:sticky;top:0;z-index:850;display:flex;flex-direction:column;align-items:stretch;gap:10px;margin:0 0 16px;padding:10px 0 12px;background:linear-gradient(180deg,rgba(2,6,23,.96),rgba(2,6,23,.84) 78%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 .logo{font-size:26px;font-weight:bold}
+<?= app_nav_styles() ?>
 .nav{display:flex;flex-wrap:nowrap;gap:4px;width:100%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:18px;padding:5px}
 .nav a{flex:1 1 0;min-width:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#e2e8f0;text-decoration:none;padding:11px 8px;border-radius:14px;font-weight:800;font-size:14px;border:0;background:transparent}
 .nav a:hover{background:rgba(255,255,255,.08);color:#fff}
@@ -131,13 +134,7 @@ tr td:last-child{border-radius:14px 0 0 14px}
 <body>
 <div class="container">
     <div class="header">
-        <div class="logo">💊 Medical Sales</div>
-        <div class="nav">
-            <a class="btn-nav-dash" href="dashboard.php">الداشبورد</a>
-            <a class="btn-nav-products active" href="products.php">المنتجات</a>
-            <a class="btn-nav-sales" href="reports.php">المبيعات</a>
-            <a class="btn-nav-pharmacies" href="pharmacies.php">الصيدليات</a>
-        </div>
+        <?php app_nav('products'); ?>
     </div>
 
     <?php if($msg): ?><div class="msg"><?= htmlspecialchars($msg) ?></div><?php endif; ?>

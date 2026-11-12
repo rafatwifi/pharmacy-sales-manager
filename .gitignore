@@ -4,5 +4,9 @@ uploads/
 .env.*
 .DS_Store
 Thumbs.db
-
 123.zip
+storage/app.key
+storage/users.json
+storage/packages.json
+storage/lock.json
+storage/tenants/

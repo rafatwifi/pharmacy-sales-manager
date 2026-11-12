@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/store.php';
 
-$sales = json_decode(file_get_contents($salesFile), true) ?: [];
+$sales = loadSales();
 $period = currentPeriod();
 $currentReport = buildPharmacyReport(salesInPeriod($sales, $period));
 $oldReport = buildPharmacyReport(salesBeforePeriod($sales, $period));
@@ -44,6 +44,7 @@ body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(c
 .container{width:100%;max-width:1300px;margin:auto;padding:16px}
 .header{position:sticky;top:0;z-index:850;display:flex;flex-direction:column;align-items:stretch;gap:10px;margin:0 0 16px;padding:10px 0 12px;background:linear-gradient(180deg,rgba(2,6,23,.96),rgba(2,6,23,.84) 78%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 .logo{font-size:26px;font-weight:bold}
+<?= app_nav_styles() ?>
 .nav{display:flex;flex-wrap:nowrap;gap:4px;width:100%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:18px;padding:5px}
 .nav a{flex:1 1 0;min-width:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#e2e8f0;text-decoration:none;padding:11px 8px;border-radius:14px;font-weight:800;font-size:14px;border:0;background:transparent}
 .nav a:hover{background:rgba(255,255,255,.08);color:#fff}
@@ -81,13 +82,7 @@ tr td:last-child{border-radius:14px 0 0 14px}
 <body>
 <div class="container" id="top">
     <div class="header">
-        <div class="logo">🏪 الصيدليات</div>
-        <div class="nav">
-            <a class="btn-nav-dash" href="dashboard.php">الداشبورد</a>
-            <a class="btn-nav-products" href="products.php">المنتجات</a>
-            <a class="btn-nav-sales" href="reports.php">المبيعات</a>
-            <a class="btn-nav-pharmacies active" href="pharmacies.php">الصيدليات</a>
-        </div>
+        <?php app_nav('pharmacies'); ?>
     </div>
 
     <div class="card">

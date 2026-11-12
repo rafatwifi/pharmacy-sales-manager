@@ -1,9 +1,8 @@
 <?php
 require_once __DIR__ . '/store.php';
-$uploadPath = 'uploads/products/';
 
-$products = json_decode(file_get_contents($dataFile), true) ?: [];
-$sales = json_decode(file_get_contents($salesFile), true) ?: [];
+$products = loadProducts();
+$sales = loadSales();
 $msg = '';
 $period = currentPeriod();
 
@@ -15,11 +14,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $msg = 'يرجى إدخال اسم الصيدلية ❌';
         } else {
             $added = 0;
+            $newRows = array();
             foreach ($products as $p) {
                 $id = (string)$p['id'];
-                $sellQty = (int)($qtys[$id] ?? 0);
+                $sellQty = (int)(isset($qtys[$id]) ? $qtys[$id] : 0);
                 if ($sellQty > 0) {
-                    $sales[] = [
+                    $newRows[] = array(
                         'product_id' => $p['id'],
                         'product' => $p['name'],
                         'pharmacy' => $pharmacy,
@@ -29,14 +29,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'date' => date('Y-m-d H:i'),
                         'period' => $period,
                         'closed' => 0
-                    ];
+                    );
                     $added++;
                 }
             }
             if ($added > 0) {
-                saveJson($salesFile, $sales);
-                header('Location: dashboard.php?msg=sold');
-                exit;
+                $limits = package_limits();
+                if ($limits['max_sales'] > 0 && (count($sales) + $added) > $limits['max_sales']) {
+                    $msg = 'وصلت حد المبيعات في باقتك ❌';
+                } else {
+                    foreach ($newRows as $row) $sales[] = $row;
+                    saveJson($salesFile, $sales);
+                    header('Location: ' . url('dashboard') . '?msg=sold');
+                    exit;
+                }
             }
             $msg = 'يرجى إدخال كمية لمنتج واحد على الأقل ❌';
         }
@@ -119,6 +125,7 @@ body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(c
 .container{width:100%;max-width:1300px;margin:auto;padding:16px}
 .header{position:sticky;top:0;z-index:850;display:flex;flex-direction:column;align-items:stretch;gap:10px;margin:0 0 16px;padding:10px 0 12px;background:linear-gradient(180deg,rgba(2,6,23,.96),rgba(2,6,23,.84) 78%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 .logo{font-size:26px;font-weight:bold}
+<?= app_nav_styles() ?>
 .nav{display:flex;flex-wrap:nowrap;gap:4px;width:100%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:18px;padding:5px}
 .nav a{flex:1 1 0;min-width:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#e2e8f0;text-decoration:none;padding:11px 8px;border-radius:14px;font-weight:800;font-size:14px;border:0;background:transparent}
 .nav a:hover{background:rgba(255,255,255,.08);color:#fff}
@@ -204,13 +211,7 @@ body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(c
 <body>
 <div class="container" id="top">
     <div class="header">
-        <div class="logo">💊 Medical Sales</div>
-        <div class="nav">
-            <a class="btn-nav-dash active" href="dashboard.php">الداشبورد</a>
-            <a class="btn-nav-products" href="products.php">المنتجات</a>
-            <a class="btn-nav-sales" href="reports.php">المبيعات</a>
-            <a class="btn-nav-pharmacies" href="pharmacies.php">الصيدليات</a>
-        </div>
+        <?php app_nav('dashboard'); ?>
     </div>
 
     <?php if($msg): ?><div class="msg<?= strpos($msg, '❌') !== false ? ' err' : '' ?>"><?= htmlspecialchars($msg) ?></div><?php endif; ?>

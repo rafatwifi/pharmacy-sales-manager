@@ -1,48 +1,49 @@
 <?php
-$dataFile = __DIR__ . '/data.json';
-$salesFile = __DIR__ . '/sales.json';
-$metaFile = __DIR__ . '/meta.json';
+require_once __DIR__ . '/auth.php';
+if (empty($GLOBALS['APP_SKIP_LOGIN'])) {
+    app_require_login();
+}
 
-if (!file_exists($dataFile)) file_put_contents($dataFile, '[]');
-if (!file_exists($salesFile)) file_put_contents($salesFile, '[]');
+$paths = tenant_paths();
+$dataFile = $paths['data'];
+$salesFile = $paths['sales'];
+$metaFile = $paths['meta'];
+$uploadPath = $paths['upload_url'];
+$uploadFs = $paths['upload_fs'];
 
-function saveJson($file, $data) {
-    $payload = is_array($data) && array_keys($data) === range(0, count($data) - 1)
-        ? array_values($data)
-        : $data;
-    $json = json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-    $ok = file_put_contents($file, $json, LOCK_EX);
-    @chmod($file, 0666);
-    return $ok !== false;
+if (!file_exists($dataFile)) saveJson($dataFile, array());
+if (!file_exists($salesFile)) saveJson($salesFile, array());
+if (!file_exists($metaFile)) {
+    saveJson($metaFile, array(
+        'current_period' => 1,
+        'cycles' => array(array('id' => 1, 'started_at' => date('Y-m-d H:i'), 'ended_at' => null))
+    ));
 }
 
 function loadSales() {
     global $salesFile;
-    if (!file_exists($salesFile)) return [];
-    $sales = json_decode(file_get_contents($salesFile), true);
-    return is_array($sales) ? $sales : [];
+    return load_json_file($salesFile, array());
+}
+
+function loadProducts() {
+    global $dataFile;
+    return load_json_file($dataFile, array());
 }
 
 function loadMeta() {
     global $metaFile;
-    $default = [
+    $default = array(
         'current_period' => 1,
-        'cycles' => [
-            ['id' => 1, 'started_at' => date('Y-m-d H:i'), 'ended_at' => null]
-        ]
-    ];
-    if (!file_exists($metaFile)) {
-        saveJson($metaFile, $default);
-        return $default;
-    }
-    $meta = json_decode(file_get_contents($metaFile), true);
-    if (!is_array($meta) || !isset($meta['current_period']) || (int)$meta['current_period'] < 1) {
+        'cycles' => array(array('id' => 1, 'started_at' => date('Y-m-d H:i'), 'ended_at' => null))
+    );
+    $meta = load_json_file($metaFile, $default);
+    if (!isset($meta['current_period']) || (int)$meta['current_period'] < 1) {
         saveJson($metaFile, $default);
         return $default;
     }
     $meta['current_period'] = (int)$meta['current_period'];
     if (empty($meta['cycles']) || !is_array($meta['cycles'])) {
-        $meta['cycles'] = [['id' => $meta['current_period'], 'started_at' => date('Y-m-d H:i'), 'ended_at' => null]];
+        $meta['cycles'] = array(array('id' => $meta['current_period'], 'started_at' => date('Y-m-d H:i'), 'ended_at' => null));
     }
     return $meta;
 }
@@ -66,7 +67,7 @@ function isCurrentSale($sale, $period) {
 }
 
 function salesInPeriod($sales, $period) {
-    $out = [];
+    $out = array();
     foreach ($sales as $s) {
         if (isCurrentSale($s, $period)) $out[] = $s;
     }
@@ -74,7 +75,7 @@ function salesInPeriod($sales, $period) {
 }
 
 function salesBeforePeriod($sales, $period) {
-    $out = [];
+    $out = array();
     foreach ($sales as $s) {
         if (!isCurrentSale($s, $period)) $out[] = $s;
     }
@@ -101,7 +102,7 @@ function startNewCycle() {
     }
 
     if (empty($meta['cycles']) || !is_array($meta['cycles'])) {
-        $meta['cycles'] = [];
+        $meta['cycles'] = array();
     }
     foreach ($meta['cycles'] as &$cycle) {
         if ((int)$cycle['id'] === $old && empty($cycle['ended_at'])) {
@@ -111,23 +112,22 @@ function startNewCycle() {
     unset($cycle);
     $new = $old + 1;
     $meta['current_period'] = $new;
-    $meta['cycles'][] = ['id' => $new, 'started_at' => $now, 'ended_at' => null];
+    $meta['cycles'][] = array('id' => $new, 'started_at' => $now, 'ended_at' => null);
     saveMeta($meta);
-
     return true;
 }
 
 function buildPharmacyReport($sales) {
-    $report = [];
+    $report = array();
     foreach ($sales as $s) {
-        $pharmacyName = trim((string)($s['pharmacy'] ?? ''));
+        $pharmacyName = trim((string)(isset($s['pharmacy']) ? $s['pharmacy'] : ''));
         if ($pharmacyName === '') $pharmacyName = 'غير محدد';
-        $productName = $s['product'] ?? '—';
+        $productName = isset($s['product']) ? $s['product'] : '—';
         if (!isset($report[$pharmacyName])) {
-            $report[$pharmacyName] = ['products' => [], 'qty' => 0, 'total' => 0];
+            $report[$pharmacyName] = array('products' => array(), 'qty' => 0, 'total' => 0);
         }
         if (!isset($report[$pharmacyName]['products'][$productName])) {
-            $report[$pharmacyName]['products'][$productName] = ['qty' => 0, 'total' => 0];
+            $report[$pharmacyName]['products'][$productName] = array('qty' => 0, 'total' => 0);
         }
         $qty = (int)$s['qty'];
         $total = (float)$s['total'];
@@ -137,4 +137,16 @@ function buildPharmacyReport($sales) {
         $report[$pharmacyName]['total'] += $total;
     }
     return $report;
+}
+
+function package_limits() {
+    $user = current_user();
+    $pkg = $user && !empty($user['package_id']) ? package_by_id($user['package_id']) : null;
+    if (!$pkg || (!empty($user['role']) && $user['role'] === 'admin')) {
+        return array('max_products' => 0, 'max_sales' => 0);
+    }
+    return array(
+        'max_products' => isset($pkg['max_products']) ? (int)$pkg['max_products'] : 0,
+        'max_sales' => isset($pkg['max_sales']) ? (int)$pkg['max_sales'] : 0
+    );
 }
