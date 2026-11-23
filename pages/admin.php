@@ -372,7 +372,6 @@ a{color:inherit}
             <form method="post">
               <?= csrf_field() ?>
               <input type="hidden" name="action" value="set_admin_pass">
-              <p style="margin:0;color:var(--muted);font-weight:700">كلمة جديدة فقط، بدون كلمة المرور القديمة.</p>
               <input type="password" name="new_pass" placeholder="كلمة مرور جديدة" required>
               <input type="password" name="new_pass2" placeholder="تأكيد كلمة المرور" required>
               <button class="btn ok" type="submit">تغيير كلمة مرور المدير</button>
