@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $err = 'تأكيد كلمة المرور غير مطابق';
             } else {
                 update_user($targetId, array('password' => password_hash($p1, PASSWORD_BCRYPT)));
-                $msg = 'تم تغيير كلمة المرور لـ ' . $target['username'] . ' دون الحاجة لكلمة المرور القديمة';
+                $msg = 'تم تغيير كلمة المرور لـ ' . $target['username'];
             }
             $tab = ($action === 'set_admin_pass' || ($target && is_admin_user($target))) ? 'account' : 'users';
         } elseif ($action === 'delete_user') {
@@ -550,7 +550,7 @@ a{color:inherit}
     <?php else: ?>
     <div class="panel">
       <h2>كلمة مرور المدير</h2>
-      <p style="color:var(--muted);font-weight:700">الحساب الحالي: <?= htmlspecialchars($me['username'], ENT_QUOTES, 'UTF-8') ?>. اكتب كلمة المرور الجديدة فقط، ولا تُطلب كلمة المرور القديمة.</p>
+      <p style="color:var(--muted);font-weight:700">الحساب الحالي: <?= htmlspecialchars($me['username'], ENT_QUOTES, 'UTF-8') ?></p>
       <form method="post" class="grid2">
         <?= csrf_field() ?>
         <input type="hidden" name="action" value="set_admin_pass">
