@@ -159,12 +159,12 @@ body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(c
 .progress{height:22px;border-radius:20px;background:rgba(255,255,255,.2);overflow:hidden;margin-top:15px;position:relative}
 .progress-text{position:absolute;width:100%;text-align:center;line-height:22px;font-size:13px;font-weight:bold;color:#fff;text-shadow:1px 1px 3px rgba(0,0,0,0.8);z-index:2;left:0;top:0}
 .bar{height:100%;background:linear-gradient(135deg,#a3e635,#db2777);transition:width 0.3s}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(2,6,23,.72);z-index:1000;align-items:stretch;justify-content:center;padding:6px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(2,6,23,.72);z-index:1000;align-items:center;justify-content:center;padding:max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom));box-sizing:border-box}
 .modal-overlay.open{display:flex}
-.modal{width:100%;max-width:520px;max-height:92vh;overflow:auto;background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid rgba(255,255,255,.2);border-radius:22px;padding:22px}
-.modal-sell{max-width:720px;width:min(720px,100%);flex:1;height:auto;max-height:none;overflow:hidden;display:flex;flex-direction:column;padding:14px}
-.sell-form{display:flex;flex-direction:column;flex:1;min-height:0}
-.modal h3{margin:0 0 8px;font-size:20px}
+.modal{width:100%;max-width:520px;max-height:min(92vh, calc(100dvh - 16px));overflow:auto;-webkit-overflow-scrolling:touch;background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid rgba(255,255,255,.2);border-radius:22px;padding:22px}
+.modal-sell{max-width:720px;width:min(720px,100%);flex:0 1 auto;height:min(92vh, calc(100dvh - 16px));max-height:min(92vh, calc(100dvh - 16px));overflow:hidden;display:flex;flex-direction:column;padding:14px}
+.sell-form{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden}
+.modal h3{margin:0 0 8px;font-size:20px;flex:0 0 auto}
 .modal label{display:block;margin:0 0 6px;color:#f9a8d4;font-size:14px;font-weight:700}
 .suggest-box{position:relative;margin:0 0 12px;flex:0 0 auto}
 .suggest-box input{width:100%;padding:12px;border:0;border-radius:12px;font-size:16px;text-align:center;font-family:inherit}
@@ -173,11 +173,11 @@ body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(c
 .suggest-item{padding:10px 12px;cursor:pointer;font-weight:700}
 .suggest-item:hover{background:rgba(244,114,182,.28)}
 .suggest-hint{font-size:12px;color:#cbd5e1;margin:6px 0 0}
-.sell-list{flex:1 1 auto;min-height:58vh;max-height:none;overflow-y:auto;margin:0 0 12px;padding:2px;display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:7px;align-content:start}
+.sell-list{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;margin:0 0 10px;padding:2px 2px 8px;display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:7px;align-content:start}
 .sell-item{display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:8px 10px;margin:0}
 .sell-item .pname{flex:1;font-weight:700;text-align:right;font-size:14px}
 .sell-item input{width:72px;padding:8px;border:0;border-radius:10px;text-align:center;font-family:inherit;font-size:15px}
-.modal-actions{display:flex;gap:10px;flex:0 0 auto}
+.modal-actions{display:flex;gap:10px;flex:0 0 auto;position:sticky;bottom:0;padding-top:8px;background:linear-gradient(180deg,rgba(15,23,42,0),rgba(15,23,42,.96) 28%,#0f172a);z-index:2}
 .modal-actions button{flex:1;padding:12px;border:0;border-radius:12px;color:white;font-weight:bold;cursor:pointer;font-family:inherit}
 .btn-cancel{background:rgba(255,255,255,.18)}
 .btn-confirm{background:linear-gradient(180deg,#f472b6,#db2777)}
@@ -201,10 +201,11 @@ body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:radial-gradient(c
   .widget .sub{font-size:11px}
   .widget .num{font-size:16px;margin-top:6px}
   .widget .icon{font-size:26px;left:10px;bottom:6px}
-  .modal-sell{padding:12px;border-radius:18px}
-  .sell-list{min-height:62vh}
+  .modal-sell{padding:12px;border-radius:18px;height:min(96vh, calc(100dvh - 12px));max-height:min(96vh, calc(100dvh - 12px))}
+  .sell-list{min-height:0}
   .sell-item .pname{font-size:13px}
   .sell-item input{width:64px;padding:7px}
+  .modal-actions{padding-bottom:2px}
 }
 </style>
 </head>
