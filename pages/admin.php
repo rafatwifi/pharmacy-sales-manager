@@ -61,10 +61,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $msg = 'تم تعيين الباقة عبر زين كاش وتجديد الاشتراك';
             }
             $tab = 'users';
-        } elseif ($action === 'set_pass') {
+        } elseif ($action === 'set_pass' || $action === 'set_admin_pass') {
             $p1 = isset($_POST['new_pass']) ? $_POST['new_pass'] : '';
             $p2 = isset($_POST['new_pass2']) ? $_POST['new_pass2'] : '';
-            $target = find_user_by('id', $uid);
+            $targetId = ($action === 'set_admin_pass') ? $me['id'] : $uid;
+            $target = find_user_by('id', $targetId);
             if (!$target) {
                 $err = 'المستخدم غير موجود';
             } elseif (strlen($p1) < 4) {
@@ -72,10 +73,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } elseif ($p1 !== $p2) {
                 $err = 'تأكيد كلمة المرور غير مطابق';
             } else {
-                update_user($uid, array('password' => password_hash($p1, PASSWORD_BCRYPT)));
-                $msg = 'تم تغيير كلمة المرور لـ ' . $target['username'];
+                update_user($targetId, array('password' => password_hash($p1, PASSWORD_BCRYPT)));
+                $msg = 'تم تغيير كلمة المرور لـ ' . $target['username'] . ' دون الحاجة لكلمة المرور القديمة';
             }
-            $tab = 'users';
+            $tab = ($action === 'set_admin_pass' || ($target && is_admin_user($target))) ? 'account' : 'users';
         } elseif ($action === 'delete_user') {
             $target = find_user_by('id', $uid);
             if ($target && delete_user_account($uid)) {
@@ -365,7 +366,19 @@ a{color:inherit}
           <span><?= htmlspecialchars(isset($u['expires_at']) && $u['expires_at']!=='' ? $u['expires_at'] : '—', ENT_QUOTES, 'UTF-8') ?></span>
         </div>
         <?php if (is_admin_user($u)): ?>
-          <span class="pill admin">حساب الإدارة</span>
+        <details class="acts">
+          <summary>كلمة المرور</summary>
+          <div class="sheet">
+            <form method="post">
+              <?= csrf_field() ?>
+              <input type="hidden" name="action" value="set_admin_pass">
+              <p style="margin:0;color:var(--muted);font-weight:700">كلمة جديدة فقط، بدون كلمة المرور القديمة.</p>
+              <input type="password" name="new_pass" placeholder="كلمة مرور جديدة" required>
+              <input type="password" name="new_pass2" placeholder="تأكيد كلمة المرور" required>
+              <button class="btn ok" type="submit">تغيير كلمة مرور المدير</button>
+            </form>
+          </div>
+        </details>
         <?php else: ?>
         <details class="acts">
           <summary>إجراءات</summary>
@@ -537,16 +550,24 @@ a{color:inherit}
 
     <?php else: ?>
     <div class="panel">
-      <h2>تغيير دخول المدير</h2>
-      <p style="color:var(--muted);font-weight:700">الحساب الحالي: <?= htmlspecialchars($me['username'], ENT_QUOTES, 'UTF-8') ?></p>
+      <h2>كلمة مرور المدير</h2>
+      <p style="color:var(--muted);font-weight:700">الحساب الحالي: <?= htmlspecialchars($me['username'], ENT_QUOTES, 'UTF-8') ?>. اكتب كلمة المرور الجديدة فقط، ولا تُطلب كلمة المرور القديمة.</p>
+      <form method="post" class="grid2">
+        <?= csrf_field() ?>
+        <input type="hidden" name="action" value="set_admin_pass">
+        <div class="field"><label>كلمة مرور جديدة</label><input type="password" name="new_pass" placeholder="كلمة المرور الجديدة" required></div>
+        <div class="field"><label>تأكيد كلمة المرور</label><input type="password" name="new_pass2" placeholder="أعد كتابة كلمة المرور" required></div>
+        <div class="field"><label>&nbsp;</label><button class="btn ok" type="submit">تغيير كلمة المرور</button></div>
+      </form>
+    </div>
+    <div class="panel" style="margin-top:16px">
+      <h2>اسم الدخول</h2>
       <form method="post" class="grid2">
         <?= csrf_field() ?>
         <input type="hidden" name="action" value="change_admin">
         <div class="field"><label>الاسم</label><input name="admin_name" value="<?= htmlspecialchars($me['name'], ENT_QUOTES, 'UTF-8') ?>"></div>
         <div class="field"><label>اسم المستخدم</label><input name="admin_username" value="<?= htmlspecialchars($me['username'], ENT_QUOTES, 'UTF-8') ?>" required></div>
-        <div class="field"><label>كلمة مرور جديدة</label><input type="password" name="admin_password" placeholder="اتركها فارغة إذا لا تريد التغيير"></div>
-        <div class="field"><label>تأكيد كلمة المرور</label><input type="password" name="admin_password2"></div>
-        <div class="field"><label>&nbsp;</label><button class="btn ok" type="submit">حفظ حساب المدير</button></div>
+        <div class="field"><label>&nbsp;</label><button class="btn ghost" type="submit">حفظ الاسم</button></div>
       </form>
     </div>
     <?php endif; ?>
